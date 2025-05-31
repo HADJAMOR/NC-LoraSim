@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gestion des Simulations</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3a0ca3;
+      --success-color: #4cc9f0;
+      --danger-color: #f72585;
+      --warning-color: #f8961e;
+      --light-bg: #f8f9fa;
+      --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+    
+    body {
+      background-color: var(--light-bg);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin-top: 40px;
+    }
+    
+    .page-title {
+      color: var(--secondary-color);
+      text-align: center;
+      margin-bottom: 40px;
+      font-weight: 700;
+      position: relative;
+      padding-bottom: 15px;
+    }
+    
+    .page-title:after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 3px;
+      background: var(--primary-color);
+    }
+    
+    .simulation-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--card-shadow);
+      transition: var(--transition);
+      border-left: 4px solid var(--primary-color);
+    }
+    
+    .simulation-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .simulation-card.completed {
+      border-left-color: var(--success-color);
+    }
+    
+    .simulation-card.stopped {
+      border-left-color: var(--warning-color);
+    }
+    
+    .simulation-card.failed {
+      border-left-color: var(--danger-color);
+    }
+    
+    .status-badge {
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    
+    .status-running {
+      background-color: #e3f2fd;
+      color: var(--primary-color);
+    }
+    
+    .status-completed {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+    }
+    
+    .status-stopped {
+      background-color: #fff8e1;
+      color: #ff8f00;
+    }
+    
+    .btn-custom {
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    
+    .btn-primary-custom {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .btn-primary-custom:hover {
+      background-color: var(--secondary-color);
+      border-color: var(--secondary-color);
+    }
+    
+    .btn-new-simulation {
+      background-color: var(--success-color);
+      border-color: var(--success-color);
+      padding: 12px 24px;
+      font-size: 1.1rem;
+      box-shadow: 0 4px 8px rgba(76, 201, 240, 0.3);
+    }
+    
+    .btn-new-simulation:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(76, 201, 240, 0.4);
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: var(--card-shadow);
+    }
+    
+    .empty-state i {
+      font-size: 3rem;
+      color: #ccc;
+      margin-bottom: 20px;
+    }
+    
+    .simulation-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+    
+    .simulation-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .modal-content {
+      border-radius: 10px;
+    }
+    
+    .form-label {
+      font-weight: 600;
+    }
+    
+    @media (max-width: 768px) {
+      .simulation-meta {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .simulation-actions {
+        flex-wrap: wrap;
+      }
+      
+      .simulation-actions .btn {
+        flex: 1 0 45%;
+      }
+    }
+      /* Dropdown simple */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-toggle {
+  background: none;
+  border: none;
+  color: #374151;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-family: 'Roboto', sans-serif;
+}
+
+.dropdown-toggle:hover {
+  color: #2563eb;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 120%;
+  background-color: white;
+  width: 160px;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+.dropdown-menu a {
+  display: block;
+  padding: 10px 16px;
+  font-size: 0.875rem;
+  color: #374151;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.dropdown-menu a:hover {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+/* Style for tooltips */
+[data-toggle="tooltip"] {
+      border-bottom: 1px dashed #999;
+      cursor: help;
+    }
+      /* Style pour la barre de navigation */
+      .w-full {
+            width: 100%;
+        }
+        
+        .bg-white {
+            background-color: white;
+        }
+        
+        .shadow-md {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .rounded-2xl {
+            border-radius: 1rem;
+        }
+        
+        .mb-8 {
+            margin-bottom: 2rem;
+        }
+        
+        .px-6 {
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+        
+        .py-4 {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        
+        .max-w-7xl {
+            max-width: 80rem;
+        }
+        
+        .mx-auto {
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .flex {
+            display: flex;
+        }
+        
+        .items-center {
+            align-items: center;
+        }
+        
+        .justify-between {
+            justify-content: space-between;
+        }
+        
+        .text-xl {
+            font-size: 1.25rem;
+            line-height: 1.75rem;
+        }
+        
+        .font-bold {
+            font-weight: 700;
+        }
+        
+        .text-blue-600 {
+            color: #2563eb;
+        }
+        
+        .space-x-6 > * + * {
+            margin-left: 1.5rem;
+        }
+        
+        .text-gray-700 {
+            color: #374151;
+        }
+        
+        .hover\:text-blue-600:hover {
+            color: #2563eb;
+        }
+        
+        .font-medium {
+            font-weight: 500;
+        }
+        
+        .relative {
+            position: relative;
+        }
+        
+        .group:hover .group-hover\:block {
+            display: block;
+        }
+        
+        .focus\:outline-none:focus {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+        }
+        
+        .ml-1 {
+            margin-left: 0.25rem;
+        }
+        
+        .h-4 {
+            height: 1rem;
+        }
+        
+        .w-4 {
+            width: 1rem;
+        }
+        
+        .absolute {
+            position: absolute;
+        }
+        
+        .right-0 {
+            right: 0;
+        }
+        
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+        
+        .w-40 {
+            width: 10rem;
+        }
+        
+        .rounded-lg {
+            border-radius: 0.5rem;
+        }
+        
+        .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .ring-1 {
+            --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+            --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+            box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+        }
+        
+        .ring-gray-200 {
+            --tw-ring-color: rgba(229, 231, 235, 1);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .block {
+            display: block;
+        }
+        
+        .px-4 {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        .py-2 {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+        
+        .text-sm {
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+        
+        .hover\:bg-red-50:hover {
+            background-color: #fef2f2;
+        }
+        
+        .hover\:text-red-600:hover {
+            color: #dc2626;
+        }
+        
+        .transition-colors {
+            transition-property: background-color, border-color, color, fill, stroke;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 150ms;
+        }
+  </style>
+</head>
+<body>
+  <nav class="w-full bg-white shadow-md rounded-2xl mb-8 px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      
+      <!-- Logo -->
+      <div class="text-xl font-bold text-blue-600">NC-LoraSim</div>
+  
+      <!-- Menu principal -->
+      <div class="flex items-center space-x-6">
+        <a href="/index.html" class="text-gray-700 hover:text-blue-600 font-medium">Accueil</a>
+        <a href="/connexion.html" class="text-gray-700 hover:text-blue-600 font-medium">Connexion</a>
+        <a href="/simulation-manager.html" class="text-blue-600 font-semibold underline">Mode automatique</a>
+        <a href="/NS3-LoRaWan.html" class="text-gray-700 hover:text-blue-600 font-medium">Mode manuel</a>
+      </div>
+  
+      <!-- Menu utilisateur -->
+      <div class="dropdown">
+        <button id="accountBtn" class="btn btn-light dropdown-toggle" type="button">
+          Mon compte
+        </button>
+        <div id="accountMenu" class="dropdown-menu dropdown-menu-right">
+          <a class="dropdown-item text-danger" href="/connexion.html">Déconnexion</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+  
+  <div class="container">
+    <h1 class="page-title">Gestion des Simulations Parallèles</h1>
+
+    <!-- Liste des simulations précédentes -->
+    <div id="simulation-container">
+      <h3 class="mb-4"><i class="fas fa-history me-2"></i>Historique des simulations</h3>
+      
+      <!-- L'historique sera ajouté ici dynamiquement -->
+      <div id="empty-state" class="empty-state" style="display: none;">
+        <i class="fas fa-folder-open"></i>
+        <h4>Aucune simulation disponible</h4>
+        <p class="text-muted">Commencez par lancer une nouvelle simulation</p>
+      </div>
+    </div>
+
+    <!-- Lancer une nouvelle simulation -->
+    <div class="text-center mt-5 mb-5">
+      <button class="btn btn-primary btn-new-simulation" id="start-simulation-btn" data-bs-toggle="modal" data-bs-target="#simulationModal">
+        <i class="fas fa-plus-circle me-2"></i>Lancer une nouvelle simulation
+      </button>
+    </div>
+
+    <!-- Modal pour nommer la simulation -->
+    <div class="modal fade" id="simulationModal" tabindex="-1" aria-labelledby="simulationModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="simulationModalLabel">Nommer la simulation</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="simulationForm">
+              <div class="mb-3">
+                <label for="simulationName" class="form-label">Nom de la simulation</label>
+                <input type="text" class="form-control" id="simulationName" placeholder="Ma simulation LoRaWAN" required>
+              </div>
+              
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+            <button type="button" class="btn btn-primary" id="confirmSimulation">Confirmer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+         document.addEventListener("DOMContentLoaded", () => {
+    const links = document.querySelectorAll("nav a");
+    const currentPage = window.location.pathname;
+
+    links.forEach(link => {
+      if (link.getAttribute("href") === currentPage) {
+        link.classList.add("text-blue-600", "font-semibold", "underline");
+      }
+    });
+  });
+    // Fonction pour charger l'historique des simulations depuis le localStorage
+    function chargerHistoriqueSimulations() {
+      const simulations = JSON.parse(localStorage.getItem('simulations')) || [];
+      const simulationContainer = document.getElementById('simulation-container');
+      const emptyState = document.getElementById('empty-state');
+      
+      // Masquer l'état vide si des simulations existent
+      if (simulations.length > 0) {
+        emptyState.style.display = 'none';
+        
+        // Créer un conteneur pour les cartes de simulation
+        const cardsContainer = document.createElement('div');
+        cardsContainer.className = 'row row-cols-1 g-4';
+        
+        // Afficher chaque simulation avec une date et heure d'ajout
+        simulations.forEach((simulation, index) => {
+          const dateCreation = new Date(simulation.timestamp);
+          const formattedDate = dateCreation.toLocaleDateString('fr-FR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+
+          // Déterminer la classe de statut
+          let statusClass = 'status-running';
+          let cardClass = '';
+          let statusText = 'En cours';
+          
+          if (simulation.status === 'Terminée') {
+  statusClass = 'status-completed';
+  cardClass = 'completed';
+  statusText = 'En cours'; // <-- ERREUR ICI
+}
+
+
+if (simulation.status === 'Terminée') {
+  statusClass = 'status-completed';
+  cardClass = 'completed';
+  statusText = 'Terminée'; // ✅ Correction ici
+}
+else if (simulation.status === 'Échouée') {
+  statusClass = 'status-stopped';
+  cardClass = 'failed';
+  statusText = 'Échouée'; // ✅ Correction ici
+}
+
+
+          const simulationItem = document.createElement('div');
+          simulationItem.className = `col simulation-card ${cardClass}`;
+          simulationItem.innerHTML = `
+            <div class="simulation-meta">
+              <div>
+                <h5><i class="fas fa-project-diagram me-2"></i>${simulation.name || 'Simulation sans nom'}</h5>
+                ${simulation.user ? `<p class="text-muted mb-1"><small><i class="fas fa-user me-1"></i>Créée par ${simulation.user}</small></p>` : ''}
+              </div>
+              <span class="${statusClass} status-badge"><i class="fas fa-circle-notch fa-spin me-1 ${simulation.status === 'En cours...' ? '' : 'd-none'}"></i>${statusText}</span>
+            </div>
+            <p class="text-muted"><i class="far fa-calendar-alt me-2"></i>Créée le ${formattedDate}</p>
+            ${simulation.config ? `<p><i class="fas fa-cog me-2"></i>${simulation.config}</p>` : ''}
+            <div class="simulation-actions">
+              <button class="btn btn-primary btn-custom btn-primary-custom access-btn">
+                <i class="fas fa-sign-in-alt me-1"></i>Accéder
+              </button>
+              <button class="btn btn-warning btn-custom stop-btn" onclick="arreterSimulation(${index})" ${simulation.status !== 'En cours...' ? 'disabled' : ''}>
+                <i class="fas fa-stop-circle me-1"></i>Arrêter
+              </button>
+              <button class="btn btn-danger btn-custom delete-btn" onclick="supprimerSimulation(${index})">
+                <i class="fas fa-trash-alt me-1"></i>Supprimer
+              </button>
+            </div>
+          `;
+          cardsContainer.appendChild(simulationItem);
+        });
+        
+        // Remplacer le contenu existant
+        const existingContainer = document.querySelector('#simulation-container .row');
+        if (existingContainer) {
+          existingContainer.replaceWith(cardsContainer);
+        } else {
+          simulationContainer.appendChild(cardsContainer);
+        }
+      } else {
+        emptyState.style.display = 'block';
+      }
+
+      // Ajouter l'événement de redirection pour les boutons "Accéder"
+      document.querySelectorAll('.access-btn').forEach((button) => {
+        button.addEventListener('click', function() {
+          window.location.href = '/solution.html';
+        });
+      });
+    }
+
+    // Fonction pour démarrer une nouvelle simulation
+    document.getElementById('confirmSimulation').addEventListener('click', function() {
+      const simulationName = document.getElementById('simulationName').value;
+      
+      if (!simulationName) {
+        alert('Veuillez donner un nom à votre simulation');
+        return;
+      }
+
+      const timestamp = new Date().getTime();
+      const simulations = JSON.parse(localStorage.getItem('simulations')) || [];
+      
+      // Configuration de simulation aléatoire (pour l'exemple)
+      const configs = [
+       
+      ];
+      const randomConfig = configs[Math.floor(Math.random() * configs.length)];
+
+      // Ajouter la nouvelle simulation à l'historique
+      simulations.unshift({ 
+        timestamp, 
+        name: simulationName,
+        status: 'En cours...',
+        config: randomConfig
+      });
+      localStorage.setItem('simulations', JSON.stringify(simulations));
+
+      // Fermer le modal et réinitialiser le formulaire
+      const modal = bootstrap.Modal.getInstance(document.getElementById('simulationModal'));
+      modal.hide();
+      document.getElementById('simulationForm').reset();
+
+      // Recharger l'historique
+      chargerHistoriqueSimulations();
+      
+      
+      
+      
+    
+    });
+
+    // Fonction pour arrêter une simulation
+      function arreterSimulation(index) {
+  fetch('/stop')
+    .then(response => response.text())
+    .then(data => {
+      console.log(data);
+      alert(data);
+    })
+    .catch(err => {
+      console.error('Erreur stop:', err);
+    });
+}
+
+
+
+    // Fonction pour supprimer une simulation
+    function supprimerSimulation(index) {
+      if (confirm('Êtes-vous sûr de vouloir supprimer cette simulation ?')) {
+        const simulations = JSON.parse(localStorage.getItem('simulations')) || [];
+        simulations.splice(index, 1);
+        localStorage.setItem('simulations', JSON.stringify(simulations));
+        chargerHistoriqueSimulations();
+      }
+    }
+
+    // Charger l'historique des simulations au démarrage
+    document.addEventListener('DOMContentLoaded', chargerHistoriqueSimulations);
+  </script>
+</body>
+</html>

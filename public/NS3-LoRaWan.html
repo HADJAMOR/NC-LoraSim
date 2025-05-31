@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NC-LoraSim</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Chart.js et plugin datalabels -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
+    <style>
+        /* Style pour la barre de navigation */
+        .w-full {
+            width: 100%;
+        }
+        
+        .bg-white {
+            background-color: white;
+        }
+        
+        .shadow-md {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .rounded-2xl {
+            border-radius: 1rem;
+        }
+        
+        .mb-8 {
+            margin-bottom: 2rem;
+        }
+        
+        .px-6 {
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+        
+        .py-4 {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        
+        .max-w-7xl {
+            max-width: 80rem;
+        }
+        
+        .mx-auto {
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .flex {
+            display: flex;
+        }
+        
+        .items-center {
+            align-items: center;
+        }
+        
+        .justify-between {
+            justify-content: space-between;
+        }
+        
+        .text-xl {
+            font-size: 1.25rem;
+            line-height: 1.75rem;
+        }
+        
+        .font-bold {
+            font-weight: 700;
+        }
+        
+        .text-blue-600 {
+            color: #2563eb;
+        }
+        
+        .space-x-6 > * + * {
+            margin-left: 1.5rem;
+        }
+        
+        .text-gray-700 {
+            color: #374151;
+        }
+        
+        .hover\:text-blue-600:hover {
+            color: #2563eb;
+        }
+        
+        .font-medium {
+            font-weight: 500;
+        }
+        
+        .relative {
+            position: relative;
+        }
+        
+        .group:hover .group-hover\:block {
+            display: block;
+        }
+        
+        .focus\:outline-none:focus {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+        }
+        
+        .ml-1 {
+            margin-left: 0.25rem;
+        }
+        
+        .h-4 {
+            height: 1rem;
+        }
+        
+        .w-4 {
+            width: 1rem;
+        }
+        
+        .absolute {
+            position: absolute;
+        }
+        
+        .right-0 {
+            right: 0;
+        }
+        
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+        
+        .w-40 {
+            width: 10rem;
+        }
+        
+        .rounded-lg {
+            border-radius: 0.5rem;
+        }
+        
+        .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .ring-1 {
+            --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+            --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+            box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+        }
+        
+        .ring-gray-200 {
+            --tw-ring-color: rgba(229, 231, 235, 1);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .block {
+            display: block;
+        }
+        
+        .px-4 {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        .py-2 {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+        
+        .text-sm {
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+        
+        .hover\:bg-red-50:hover {
+            background-color: #fef2f2;
+        }
+        
+        .hover\:text-red-600:hover {
+            color: #dc2626;
+        }
+        
+        .transition-colors {
+            transition-property: background-color, border-color, color, fill, stroke;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 150ms;
+        }
+
+        /* Styles existants */
+        .config-active {
+            border-left: 3px solid #007bff;
+            padding-left: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #34495e;
+            --border-radius: 6px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Roboto', sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin-top: 30px;
+            margin-bottom: 50px;
+        }
+
+        h1, h2 {
+            color: var(--secondary-color);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary-color);
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            font-size: 1.6rem;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .card {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 25px;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+            border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+        }
+
+        .form-control, .form-select {
+            border-radius: var(--border-radius);
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+            padding: 12px 25px;
+            border-radius: var(--border-radius);
+            border: none;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-submit:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .table {
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+        }
+
+        .table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+            border: none;
+        }
+
+        .table td, .table th {
+            padding: 12px 15px;
+            vertical-align: middle;
+        }
+
+        .table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .table tr:hover {
+            background-color: #f1f7fd;
+        }
+
+        .table-container {
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 25px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .table-container::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .navigation-arrows {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .arrow-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: var(--box-shadow);
+        }
+
+        .arrow-btn:hover {
+            background-color: #2980b9;
+            transform: scale(1.1);
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: var(--box-shadow);
+        }
+
+        .chart-container canvas {
+            width: 100% !important;
+            height: auto !important;
+        }
+
+        .form-check-label {
+            margin-left: 5px;
+            font-weight: 400;
+        }
+
+        .form-check-input {
+            width: 18px;
+            height: 18px;
+            margin-top: 0.3em;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .badge {
+            font-weight: 500;
+            padding: 6px 10px;
+            border-radius: 4px;
+        }
+
+        .badge-primary {
+            background-color: var(--primary-color);
+        }
+
+        .badge-success {
+            background-color: var(--success-color);
+        }
+
+        .badge-warning {
+            background-color: var(--warning-color);
+        }
+
+        .badge-danger {
+            background-color: var(--danger-color);
+        }
+
+        #legend {
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        #legend span {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            margin: 0 8px;
+            vertical-align: middle;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            h2 {
+                font-size: 1.4rem;
+            }
+            
+            .form-group {
+                margin-bottom: 15px;
+            }
+        }
+        #accountBtn {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    color: #000 !important; /* ou une autre couleur selon ton design */
+}
+
+#accountBtn:hover,
+#accountBtn:focus {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    color: #000 !important; /* même couleur en hover si tu veux rien changer */
+}
+
+    </style>
+</head>
+<body>
+ <!-- Barre de navigation avec menu utilisateur (menu déroulant JS au clic) -->
+<!-- Barre de navigation -->
+<nav class="w-full bg-white shadow-md rounded-2xl mb-8 px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <!-- Logo -->
+        <div class="text-xl font-bold text-blue-600">NC-LoraSim</div>
+
+        <!-- Menu principal -->
+        <div class="flex items-center space-x-6">
+            <a href="/index.html" class="text-gray-700 hover:text-blue-600 font-medium">Accueil</a>
+            <a href="/connexion.html" class="text-gray-700 hover:text-blue-600 font-medium">Connexion</a>
+            <a href="/simulation-manager.html" class="text-gray-700 hover:text-blue-600 font-medium">Mode automatique</a>
+            <a href="/NS3-LoRaWan.html" class="text-blue-600 font-semibold border-b-2 border-blue-600">Mode manuel</a>
+        </div>
+
+        <!-- Menu utilisateur -->
+        <div class="relative">
+            <button id="accountBtn" class="flex items-center text-gray-700 font-medium hover:text-blue-600 focus:outline-none">
+                <span>Mon compte</span>
+                <svg id="dropdownArrow" class="ml-1 h-4 w-4 transform transition-transform duration-200" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" />
+                </svg>
+            </button>
+
+            <!-- Menu déroulant -->
+            <div id="accountMenu" class="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg ring-1 ring-gray-200 hidden z-50 transition-all duration-200 transform opacity-0 translate-y-1">
+                <a href="#" id="logoutBtn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors">
+                    Déconnexion
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+  
+    <div class="container">
+        <h1>NC-LoraSim : Mode Manuel </h1>
+
+        <div class="card">
+            <div class="card-header">
+                Paramètres de simulation
+            </div>
+            <div class="card-body">
+                <form id="form">
+                    <div class="form-row">
+                        <div class="form-group col-md-3">
+                            <label for="appPeriod">Fréquence d'envoi (minutes)</label>
+                            <input type="number" class="form-control" id="appPeriod" name="appPeriod" value="12">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="payload">Payload (bytes)</label>
+                            <input type="number" class="form-control" id="payload" name="payload" value="20">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="nGateways">Nombre de gateways</label>
+                            <input type="number" class="form-control" id="nGateways" name="nGateways" value="3">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="nDevices">Nombre de nœuds</label>
+                            <input type="number" class="form-control" id="nDevices" name="nDevices" value="30">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="Rayon">Rayon de simulation (mètres)</label>
+                            <input type="number" class="form-control" id="radius" name="radius" value="7500">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="Duree">Durée de simulation (minutes)</label>
+                            <input type="number" class="form-control" id="simulationTime" name="simulationTime" value="60">
+                        </div>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="batiments" name="batiments">
+                        <label class="form-check-label" for="batiments">
+                            Inclure les bâtiments
+                        </label>
+                    </div>
+
+                    <!-- Formulaire HTML -->
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="manualCoordinates" onclick="toggleConfig2('Coordinates')">
+                        <label class="form-check-label" for="manualCoordinates">
+                            Configuration manuelle des coordonnées des passerelles
+                        </label>
+                    </div>
+                    
+                    <div class="form-group" id="Coordinates-config" style="display:none;">
+                        <label for="gatewayPositions">Coordonnées (format: X,Y,Z;X,Y,Z...)</label>
+                        <input type="text" class="form-control" id="gatewayPositions" placeholder="Ex: 0,0,0;4000,4000,0">
+                    </div>
+
+<div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" id="manualSF" onclick="toggleConfig('sf')">
+    <label class="form-check-label" for="manualSF">
+        Configuration manuelle des facteurs d'étalement
+    </label>
+</div>
+
+<div class="form-group" id="sf-config" style="display:none;">
+    <label for="sfValues">Facteurs d'étalement (format: SF0,SF1,SF2...)</label>
+    <input type="text" class="form-control" id="sfValues" placeholder="Ex: 7,8,9,10,11,12">
+</div>
+
+<div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" id="manualPT" onclick="toggleConfig('pt')">
+    <label class="form-check-label" for="manualPT">
+        Configuration manuelle des puissances d'émission
+    </label>
+</div>
+
+<div class="form-group" id="pt-config" style="display:none;">
+    <label for="ptValues">Puissances (format: PT0,PT1,PT2...)</label>
+    <input type="text" class="form-control" id="ptValues" placeholder="Ex: 14,12,10,8,6,4">
+</div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-submit">Lancer la simulation</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                Résumé de la simulation
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="summaryTable" class="table">
+                        <thead>
+                            <tr>
+                                <th>Paquets envoyés</th>
+                                <th>Paquets reçus</th>
+                                <th>PDR (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td id="totalSent">0</td>
+                                <td id="totalReceived">0</td>
+                                <td id="pdr">0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        Paquets reçus par passerelle
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="gatewayTable" class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ID Passerelle</th>
+                                        <th>Paquets reçus</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Lignes remplies dynamiquement -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                Détails des noeuds
+            </div>
+            <div class="card-body">
+                <div class="table-container">
+                    <table id="resultTable" class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>X</th>
+                                <th>Y</th>
+                                <th>SF</th>
+                                <th>Envoyés</th>
+                                <th>Reçus</th>
+                                <th>PDR</th>
+                                <th>ToA (ms)</th>
+                                <th>Débit (kbps)</th>
+                                <th>Energie (J)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Les données seront ajoutées ici -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation-arrows">
+            <button class="arrow-btn" id="prevBtn" onclick="changeGraph('prev')">←</button>
+            <button class="arrow-btn" id="nextBtn" onclick="changeGraph('next')">→</button>
+        </div>
+
+        
+
+        <div id="chartWithColor" class="chart-container" style="display: none;">
+            <h2>Graphique : Selon Pertes</h2>
+            <canvas id="nodeChart"></canvas>
+        </div>
+
+        <div id="chartWithoutColor" class="chart-container" style="display: none;">
+            <h2>Graphique : Positions</h2>
+            <canvas id="uniformNodeChart"></canvas>
+        </div>
+
+        <div id="sfChart" class="chart-container" style="display: none;">
+            <h2>Graphique : Selon SF</h2>
+            <canvas id="sfNodeChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Scripts JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+   
+        let chart, uniformChart, sfChart;
+        let currentGraph = 'uniform';
+       
+      
+
+        function toggleConfig2(type, options = {}) {
+    const { forceCheck = null, debug = false } = options;
+    const typeUpper = type.charAt(0).toUpperCase() + type.slice(1);
+    const configDiv = document.getElementById(`${type}-config`);
+    const checkbox = document.getElementById(`manual${typeUpper}`) || 
+                   document.getElementById(`manual${type}`);
+
+    if (debug) console.log(`[Debug] toggleConfig appelé pour ${type}`);
+
+    // Vérification des éléments
+    if (!configDiv || !checkbox) {
+        const errorMsg = `Éléments manquants: ${!configDiv ? `${type}-config` : ''} ${!checkbox ? `manual${typeUpper}` : ''}`.trim();
+        console.error(errorMsg);
+        return false;
+    }
+
+    // Détermination de l'état
+    const isChecked = forceCheck !== null ? forceCheck : checkbox.checked;
+    
+    // Application des changements
+    configDiv.style.display = isChecked ? 'block' : 'none';
+    configDiv.classList.toggle('config-active', isChecked);
+
+    // Retourne l'état appliqué pour le chaînage
+    return isChecked;
+}
+        function toggleConfig(type) {
+    try {
+        const configDiv = document.getElementById(`${type}-config`);
+        const checkbox = document.getElementById(`manual${type.toUpperCase()}`);
+        
+        if (!configDiv || !checkbox) {
+            throw new Error(`Éléments non trouvés pour ${type}`);
+        }
+        
+        configDiv.style.display = checkbox.checked ? 'block' : 'none';
+        
+        // Optionnel : Ajouter une classe pour le style
+        if (checkbox.checked) {
+            configDiv.classList.add('config-active');
+        } else {
+            configDiv.classList.remove('config-active');
+        }
+    } catch (error) {
+        console.error("Erreur de configuration:", error);
+    }
+}
+
+        document.getElementById("form").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const appPeriod = document.getElementById("appPeriod").value;
+            const payload = document.getElementById("payload").value;
+            const nGateways = document.getElementById("nGateways").value;
+            const nDevices = document.getElementById("nDevices").value;
+            const batiments = document.getElementById('batiments').checked ? 'true' : 'false';
+            const radius = document.getElementById('radius').value;
+            const simulationTime = document.getElementById('simulationTime').value;
+
+            
+            
+            const checkboxCoordinates = document.getElementById("manualCoordinates");
+            let gatewayPositions = "";
+            if (checkboxCoordinates.checked) {
+                gatewayPositions = document.getElementById("gatewayPositions").value;
+            }
+            
+            const checkboxSF = document.getElementById("manualSF");
+            let sftable = "";
+            if (checkboxSF.checked) {
+                sftable = document.getElementById("sftable").value;
+            }
+
+            const url = `/advanced-execute?appPeriod=${appPeriod}&payload=${payload}&nGateways=${nGateways}&nDevices=${nDevices}&Batiments=${batiments}&gatewayPositions=${encodeURIComponent(gatewayPositions)}&sftable=${encodeURIComponent(sftable)}&radius=${radius}&simulationTime=${simulationTime}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    const tableBody = document.querySelector('#resultTable tbody');
+                    tableBody.innerHTML = '';
+                    let totalSent = 0;
+                    let totalReceived = 0;
+
+                    const nodePositions = [];
+                    const uniformNodePositions = [];
+                    const sfPositions = [];
+
+                    // Traitement des passerelles - VERSION CORRIGÉE
+                    const gatewayTableBody = document.querySelector('#gatewayTable tbody');
+                    gatewayTableBody.innerHTML = '';
+                    
+                    const nGatewaysInt = parseInt(nGateways);
+                    const gatewayResults = {};
+                    
+                    // Initialiser toutes les passerelles à 0
+                    for (let i = 0; i < nGatewaysInt; i++) {
+                        gatewayResults[i] = 0;
+                    }
+                    
+                    // Remplir avec les données trouvées
+                    data.forEach(line => {
+                        const match = line.match(/Passerelle\s+(\d+)\s*:\s*(\d+)/);
+                        if (match) {
+                            const gwId = parseInt(match[1]);
+                            const packets = parseInt(match[2]);
+                            if (gwId >= 0 && gwId < nGatewaysInt) {
+                                gatewayResults[gwId] = packets;
+                            }
+                        }
+                    });
+                    
+                   // Afficher toutes les passerelles demandées
+for (let i = 0; i < nGatewaysInt; i++) {
+    const row = document.createElement('tr');
+    const idCell = document.createElement('td');
+    const receivedCell = document.createElement('td');
+    
+    idCell.textContent = `Passerelle ${i}`;
+    receivedCell.textContent = gatewayResults[i] || 0;
+    
+    row.appendChild(idCell);
+    row.appendChild(receivedCell);
+    gatewayTableBody.appendChild(row);
+}
+                    // Traitement des noeuds
+                    data.forEach(line => {
+                        const row = document.createElement('tr');
+                        const columns = line.split('|').map(item => item.trim());
+                        
+                        if (columns[0].startsWith('Pass')) {
+                            return;
+                        }
+
+                        columns.forEach(col => {
+                            const cell = document.createElement('td');
+                            cell.textContent = col;
+                            row.appendChild(cell);
+                        });
+
+                        tableBody.appendChild(row);
+
+                        const sent = parseInt(columns[4]);
+                        const received = parseInt(columns[5]);
+
+                        totalSent += sent;
+                        totalReceived += received;
+
+                        let color = 'blue';
+                        if (received === 0) color = 'red';
+                        else if (sent === received) color = 'green';
+
+                        nodePositions.push({
+                            x: parseFloat(columns[1]),
+                            y: parseFloat(columns[2]),
+                            backgroundColor: color,
+                            label: ` ${columns[0]}`
+                        });
+
+                        uniformNodePositions.push({
+                            x: parseFloat(columns[1]),
+                            y: parseFloat(columns[2]),
+                            backgroundColor: 'gray',
+                            label: ` ${columns[0]}`
+                        });
+
+                        sfPositions.push({
+                            x: parseFloat(columns[1]),
+                            y: parseFloat(columns[2]),
+                            radius: parseInt(columns[3]),
+                            label: ` ${columns[0]}`
+                        });
+                    });
+
+                    const pdr = totalSent > 0 ? (totalReceived / totalSent * 100).toFixed(2) : 0;
+                    document.getElementById("totalSent").textContent = totalSent;
+                    document.getElementById("totalReceived").textContent = totalReceived;
+                    document.getElementById("pdr").textContent = pdr;
+
+                    // Positions des passerelles pour les graphiques
+                    let gatewayChartPositions = [];
+                    if (nGatewaysInt == 1) {
+                        gatewayChartPositions = [
+                            { x: 0, y: 0, backgroundColor: 'black', label: 'Passerelle 0' }
+                        ];
+                    } else if (nGatewaysInt == 2) {
+                        gatewayChartPositions = [
+                            { x: 0, y: 0, backgroundColor: 'black', label: 'Passerelle 0' },
+                            { x: 4000, y: 4000, backgroundColor: 'black', label: 'Passerelle 1' }
+                        ];
+                    } else if (nGatewaysInt == 3) {
+                        gatewayChartPositions = [
+                            { x: 0, y: 0, backgroundColor: 'black', label: 'Passerelle 0' },
+                            { x: 4000, y: 4000, backgroundColor: 'black', label: 'Passerelle 1' },
+                            { x: -4000, y: -4000, backgroundColor: 'black', label: 'Passerelle 2' }
+                        ];
+                    } else if (nGatewaysInt == 4) {
+                        gatewayChartPositions = [
+                            { x: 0, y: 0, backgroundColor: 'black', label: 'Passerelle 0' },
+                            { x: 4000, y: 4000, backgroundColor: 'black', label: 'Passerelle 1' },
+                            { x: -4000, y: -4000, backgroundColor: 'black', label: 'Passerelle 2' },
+                            { x: -4000, y: 4000, backgroundColor: 'black', label: 'Passerelle 3' }
+                        ];
+                    } else if (nGatewaysInt == 5) {
+                        gatewayChartPositions = [
+                            { x: 0, y: 0, backgroundColor: 'black', label: 'Passerelle 0' },
+                            { x: 4000, y: 4000, backgroundColor: 'black', label: 'Passerelle 1' },
+                            { x: -4000, y: -4000, backgroundColor: 'black', label: 'Passerelle 2' },
+                            { x: -4000, y: 4000, backgroundColor: 'black', label: 'Passerelle 3' },
+                            { x: 4000, y: -4000, backgroundColor: 'black', label: 'Passerelle 4' }
+                        ];
+                    }
+
+                    // Graphique avec coloration par perte
+                    const ctx = document.getElementById('nodeChart').getContext('2d');
+                    if (chart) chart.destroy();
+
+                    chart = new Chart(ctx, {
+                        type: 'scatter',
+                        data: {
+                            datasets: [
+                                {
+                                    label: 'Aucune perte',
+                                    data: nodePositions.filter(n => n.backgroundColor === 'green'),
+                                    backgroundColor: 'green',
+                                    borderColor: 'green',
+                                    pointRadius: 5
+                                },
+                                {
+                                    label: 'Perte partielle',
+                                    data: nodePositions.filter(n => n.backgroundColor === 'blue'),
+                                    backgroundColor: 'blue',
+                                    borderColor: 'blue',
+                                    pointRadius: 5
+                                },
+                                {
+                                    label: 'Perte totale',
+                                    data: nodePositions.filter(n => n.backgroundColor === 'red'),
+                                    backgroundColor: 'red',
+                                    borderColor: 'red',
+                                    pointRadius: 5
+                                },
+                                {
+                                    label: 'Passerelle',
+                                    data: gatewayChartPositions,
+                                    backgroundColor: 'black',
+                                    borderColor: 'black',
+                                    pointStyle: 'rect',
+                                    pointRadius: 10
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top',
+                                    labels: {
+                                        boxWidth: 20,
+                                        boxHeight: 20,
+                                        font: {
+                                            size: 14
+                                        }
+                                    }
+                                },
+                                datalabels: {
+                                    align: 'top',
+                                    anchor: 'end',
+                                    color: '#000',
+                                    font: { weight: 'bold', size: 12 },
+                                    formatter: (val) => val.label
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    type: 'linear',
+                                    title: { 
+                                        display: true, 
+                                        text: 'Position X',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    }
+                                },
+                                y: {
+                                    title: { 
+                                        display: true, 
+                                        text: 'Position Y',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        plugins: [ChartDataLabels]
+                    });
+
+                    // Graphique uniforme
+                    const uniformCtx = document.getElementById('uniformNodeChart').getContext('2d');
+                    if (uniformChart) uniformChart.destroy();
+
+                    uniformChart = new Chart(uniformCtx, {
+                        type: 'scatter',
+                        data: {
+                            datasets: [
+                                {
+                                    label: 'Nœud',
+                                    data: uniformNodePositions,
+                                    backgroundColor: uniformNodePositions.map(n => n.backgroundColor),
+                                    borderColor: uniformNodePositions.map(n => n.backgroundColor),
+                                    pointRadius: 5
+                                },
+                                {
+                                    label: 'Passerelle',
+                                    data: gatewayChartPositions,
+                                    backgroundColor: 'black',
+                                    borderColor: 'black',
+                                    pointStyle: 'rect',
+                                    pointRadius: 10
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top',
+                                    labels: {
+                                        boxWidth: 20,
+                                        boxHeight: 20,
+                                        font: {
+                                            size: 14
+                                        }
+                                    }
+                                },
+                                datalabels: {
+                                    align: 'top',
+                                    anchor: 'end',
+                                    color: '#000',
+                                    font: { weight: 'bold', size: 12 },
+                                    formatter: (val) => val.label
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    type: 'linear',
+                                    title: { 
+                                        display: true, 
+                                        text: 'Position X',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    }
+                                },
+                                y: {
+                                    title: { 
+                                        display: true, 
+                                        text: 'Position Y',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        plugins: [ChartDataLabels]
+                    });
+
+                    // Graphique SF - VERSION CORRIGÉE
+                    const sfCtx = document.getElementById('sfNodeChart').getContext('2d');
+                    if (sfChart) sfChart.destroy();
+
+                    // Préparer les données groupées par SF
+                    const sfGroups = {
+                        7: { color: '#AED6F1', data: [] },
+                        8: { color: '#5DADE2', data: [] },
+                        9: { color: '#A569BD', data: [] },
+                        10: { color: '#D98880', data: [] },
+                        11: { color: '#E74C3C', data: [] },
+                        12: { color: '#922B21', data: [] }
+                    };
+
+                    // Grouper les nœuds par SF
+                    sfPositions.forEach(node => {
+                        const sf = node.radius; // SF est stocké dans radius
+                        if (sfGroups[sf]) {
+                            sfGroups[sf].data.push({
+                                x: node.x,
+                                y: node.y,
+                                label: node.label
+                            });
+                        }
+                    });
+
+                    // Créer les datasets pour Chart.js
+                    const sfDatasets = Object.entries(sfGroups).map(([sf, group]) => ({
+                        label: `SF${sf}`,
+                        data: group.data,
+                        backgroundColor: group.color,
+                        borderColor: group.color,
+                        pointRadius: 7,
+                        pointHoverRadius: 9
+                    }));
+
+                    // Ajouter le dataset des passerelles
+                    sfDatasets.push({
+                        label: 'Passerelles',
+                        data: gatewayChartPositions,
+                        backgroundColor: 'black',
+                        borderColor: 'black',
+                        pointStyle: 'rect',
+                        pointRadius: 10,
+                        pointHoverRadius: 12
+                    });
+
+                    sfChart = new Chart(sfCtx, {
+                        type: 'scatter',
+                        data: {
+                            datasets: sfDatasets
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top',
+                                    labels: {
+                                        boxWidth: 20,
+                                        boxHeight: 20,
+                                        font: {
+                                            size: 14
+                                        }
+                                    }
+                                },
+                                datalabels: {
+                                    align: 'top',
+                                    anchor: 'end',
+                                    color: '#000',
+                                    font: { weight: 'bold', size: 12 },
+                                    formatter: (val) => val.label
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    type: 'linear',
+                                    title: { 
+                                        display: true, 
+                                        text: 'Position X',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    }
+                                },
+                                y: {
+                                    title: { 
+                                        display: true, 
+                                        text: 'Position Y',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        plugins: [ChartDataLabels]
+                    });
+
+                    // Affichage des graphiques
+                    document.getElementById('chartWithColor').style.display = 'none';
+                    document.getElementById('chartWithoutColor').style.display = 'block';
+                    document.getElementById('sfChart').style.display = 'none';
+                    document.getElementById('legend').style.display = 'block';
+                    currentGraph = 'uniform';
+                });
+        });
+
+        function changeGraph(direction) {
+            const graphs = ['uniform', 'color', 'sf'];
+            let currentIndex = graphs.indexOf(currentGraph);
+
+            if (direction === 'next') {
+                currentIndex = (currentIndex + 1) % graphs.length;
+            } else if (direction === 'prev') {
+                currentIndex = (currentIndex - 1 + graphs.length) % graphs.length;
+            }
+
+            document.getElementById('chartWithColor').style.display = 'none';
+            document.getElementById('chartWithoutColor').style.display = 'none';
+            document.getElementById('sfChart').style.display = 'none';
+
+            if (graphs[currentIndex] === 'uniform') {
+                document.getElementById('chartWithoutColor').style.display = 'block';
+            } else if (graphs[currentIndex] === 'color') {
+                document.getElementById('chartWithColor').style.display = 'block';
+            } else if (graphs[currentIndex] === 'sf') {
+                document.getElementById('sfChart').style.display = 'block';
+            }
+
+            currentGraph = graphs[currentIndex];
+        }
+
+
+        const links = document.querySelectorAll("nav a");
+const currentUrl = window.location.pathname;
+
+links.forEach(link => {
+  if (link.getAttribute('href') === currentUrl) {
+    link.classList.add('text-blue-600', 'font-semibold', 'border-b-2', 'border-blue-600');
+  }
+});
+const accountBtn = document.getElementById('accountBtn');
+const accountMenu = document.getElementById('accountMenu');
+
+accountBtn.addEventListener('click', (e) => {
+  e.stopPropagation(); // évite que le clic se propage à `window`
+  accountMenu.classList.toggle('hidden');
+});
+
+window.addEventListener('click', (e) => {
+  if (!accountMenu.classList.contains('hidden')) {
+    accountMenu.classList.add('hidden');
+  }
+});
+
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NC-LoraSim - Automatic Mode</title>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary-color: #3498db;
+      --secondary-color: #2c3e50;
+      --success-color: #27ae60;
+      --danger-color: #e74c3c;
+      --light-color: #ecf0f1;
+      --dark-color: #2c3e50;
+      --border-radius: 6px;
+      --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Roboto', sans-serif;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin-top: 40px;
+      margin-bottom: 40px;
+      background: white;
+      padding: 30px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+    
+    h1 {
+      color: var(--secondary-color);
+      text-align: center;
+      margin-bottom: 40px;
+      font-weight: 700;
+      position: relative;
+      padding-bottom: 15px;
+    }
+    
+    h1:after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 3px;
+      background: var(--primary-color);
+    }
+    
+    .form-control {
+      border-radius: var(--border-radius);
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      transition: all 0.3s;
+    }
+    
+    .form-control:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+    
+    label {
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: var(--secondary-color);
+    }
+    
+    .btn-submit {
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: 500;
+      padding: 12px 25px;
+      border-radius: var(--border-radius);
+      border: none;
+      transition: all 0.3s;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      font-size: 15px;
+    }
+    
+    .btn-submit:hover {
+      background-color: #2980b9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-submit:active {
+      transform: translateY(0);
+    }
+    
+    .result-container {
+      margin-top: 30px;
+      padding: 25px;
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      border: 1px solid #eee;
+      display: none;
+    }
+    
+    textarea {
+      width: 100%;
+      resize: vertical;
+      min-height: 300px;
+      border-radius: var(--border-radius);
+      padding: 15px;
+      border: 1px solid #ddd;
+      font-family: 'Courier New', monospace;
+      background-color: #f9f9f9;
+    }
+    
+    #loader {
+      display: none;
+      text-align: center;
+      margin: 25px 0;
+    }
+    
+    .progress {
+      height: 10px;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+    
+    .progress-bar {
+      border-radius: 5px;
+      background-color: var(--primary-color);
+    }
+    
+    .btn-simple {
+      background-color: var(--success-color);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 15px;
+      font-weight: 500;
+      padding: 12px 25px;
+      text-align: center;
+      display: inline-block;
+      cursor: pointer;
+      transition: all 0.3s;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      width: 100%;
+    }
+    
+    .btn-simple:hover {
+      background-color: #219653;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-simple:active {
+      transform: translateY(0);
+    }
+    
+    #btnExecuter {
+      margin-bottom: 15px;
+    }
+    
+    .carousel {
+      margin-top: 20px;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .carousel-item {
+      padding: 20px;
+      background: white;
+      min-height: 400px;
+    }
+    
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+      background-color: var(--primary-color);
+      border-radius: 50%;
+      padding: 15px;
+      background-size: 50% 50%;
+    }
+    
+    .btn-danger {
+      background-color: var(--danger-color);
+      border: none;
+    }
+    
+    .btn-secondary {
+      background-color: var(--secondary-color);
+      border: none;
+    }
+    
+    .btn-success {
+      background-color: var(--success-color);
+      border: none;
+    }
+    
+    .form-row {
+      margin-bottom: 20px;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+      }
+      
+      h1 {
+        font-size: 24px;
+      }
+    }
+    
+    /* Animation for inputs */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .form-row > div {
+      animation: fadeIn 0.5s ease-out forwards;
+      animation-delay: calc(var(--order) * 0.1s);
+      opacity: 0;
+    }
+    
+    /* Style for tooltips */
+    [data-toggle="tooltip"] {
+      border-bottom: 1px dashed #999;
+      cursor: help;
+    }
+      /* Style pour la barre de navigation */
+      .w-full {
+            width: 100%;
+        }
+        
+        .bg-white {
+            background-color: white;
+        }
+        
+        .shadow-md {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .rounded-2xl {
+            border-radius: 1rem;
+        }
+        
+        .mb-8 {
+            margin-bottom: 2rem;
+        }
+        
+        .px-6 {
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+        
+        .py-4 {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        
+        .max-w-7xl {
+            max-width: 80rem;
+        }
+        
+        .mx-auto {
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .flex {
+            display: flex;
+        }
+        
+        .items-center {
+            align-items: center;
+        }
+        
+        .justify-between {
+            justify-content: space-between;
+        }
+        
+        .text-xl {
+            font-size: 1.25rem;
+            line-height: 1.75rem;
+        }
+        
+        .font-bold {
+            font-weight: 700;
+        }
+        
+        .text-blue-600 {
+            color: #2563eb;
+        }
+        
+        .space-x-6 > * + * {
+            margin-left: 1.5rem;
+        }
+        
+        .text-gray-700 {
+            color: #374151;
+        }
+        
+        .hover\:text-blue-600:hover {
+            color: #2563eb;
+        }
+        
+        .font-medium {
+            font-weight: 500;
+        }
+        
+        .relative {
+            position: relative;
+        }
+        
+        .group:hover .group-hover\:block {
+            display: block;
+        }
+        
+        .focus\:outline-none:focus {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+        }
+        
+        .ml-1 {
+            margin-left: 0.25rem;
+        }
+        
+        .h-4 {
+            height: 1rem;
+        }
+        
+        .w-4 {
+            width: 1rem;
+        }
+        
+        .absolute {
+            position: absolute;
+        }
+        
+        .right-0 {
+            right: 0;
+        }
+        
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+        
+        .w-40 {
+            width: 10rem;
+        }
+        
+        .rounded-lg {
+            border-radius: 0.5rem;
+        }
+        
+        .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .ring-1 {
+            --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+            --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+            box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+        }
+        
+        .ring-gray-200 {
+            --tw-ring-color: rgba(229, 231, 235, 1);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .block {
+            display: block;
+        }
+        
+        .px-4 {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        .py-2 {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+        
+        .text-sm {
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+        
+        .hover\:bg-red-50:hover {
+            background-color: #fef2f2;
+        }
+        
+        .hover\:text-red-600:hover {
+            color: #dc2626;
+        }
+        
+        .transition-colors {
+            transition-property: background-color, border-color, color, fill, stroke;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 150ms;
+        }
+        #accountBtn {
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    border: none !important;
+  }
+  #accountBtn:focus, #accountBtn:active {
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    border: none !important;
+
+    
+  }
+
+  .custom-select-vertical {
+    height: 38px; /* Bootstrap default */
+    display: flex;
+    align-items: center; /* centre verticalement le texte */
+    padding-top: 0;
+    padding-bottom: 0;
+    text-align-last: left; /* aligné à gauche */
+  }
+
+  </style>
+</head>
+<body>
+  <!-- Navigation bar with simplified user menu and active page indicator (Manual Simulation) -->
+  <nav class="w-full bg-white shadow-md rounded-2xl mb-8 px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <!-- Logo -->
+      <div class="text-xl font-bold text-blue-600">NC-LoraSim</div>
+  
+      <!-- Main menu -->
+      <div class="flex items-center space-x-6">
+        <a href="/index.html" class="text-blue-600 font-semibold border-b-2 border-blue-600">Home</a>
+        <a href="/connexion_Ang.html" class="text-gray-700 hover:text-blue-600 font-medium">Login</a>
+        <a href="/simulation-manager_Ang.html" class="text-gray-700 hover:text-blue-600 font-medium">Automatic Mode</a>
+        <a href="/NS3-LoRaWan_Ang.html" class="text-gray-700 hover:text-blue-600 font-medium">Manual Mode</a>
+      </div>
+  
+      <!-- User menu (on click) -->
+      <div class="relative">
+        <button id="accountBtn"
+  class="flex items-center text-gray-700 font-medium hover:text-blue-600
+         outline-none ring-0 focus:outline-none focus:ring-0 
+         focus:ring-transparent focus:bg-transparent active:bg-transparent
+         border-none bg-transparent shadow-none">
+  <span>My Account</span>
+  <svg class="ml-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" />
+  </svg>
+</button>
+
+      
+  
+        <!-- Dropdown menu (hidden by default) -->
+        <div id="accountMenu" class="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg ring-1 ring-gray-200 hidden z-50">
+          <a href="/connexion_Ang.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors">
+            Logout
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+  
+
+  <div class="container">
+    <h1>NC-LoraSim: Automatic Mode</h1>
+
+    <form id="form">
+      <div class="form-row">
+        <div class="col-md-4" style="--order: 1;">
+          <label for="dValues">Node List</label>
+          <input type="text" class="form-control" id="dValues" placeholder="10,20,30" required 
+                 data-toggle="tooltip" data-placement="top" title="Number of nodes to simulate (comma-separated)" />
+        </div>
+        <div class="col-md-4" style="--order: 2;">
+          <label for="gValues">Gateway List</label>
+          <input type="text" class="form-control" id="gValues" placeholder="2,3" required 
+                 data-toggle="tooltip" data-placement="top" title="Number of gateways to simulate (comma-separated)" />
+        </div>
+        <div class="col-md-4" style="--order: 3;">
+          <label for="Raduis">Simulation Radius (metres)</label>
+          <input type="text" class="form-control" id="Raduis" placeholder="7500" required 
+                 data-toggle="tooltip" data-placement="top" title="Simulation Radius" />
+        </div>
+      </div>
+    
+      <div class="form-row mt-3">
+        <div class="col-md-4" style="--order: 4;">
+          <label for="tValue">Simulation Time (min)</label>
+          <input type="number" class="form-control" id="tValue" placeholder="180" required 
+                 data-toggle="tooltip" data-placement="top" title="Total simulation duration in minutes" />
+        </div>
+        <div class="col-md-4" style="--order: 5;">
+          <label for="aValues">Application Periods (min)</label>
+          <input type="text" class="form-control" id="aValues" placeholder="3,6,9" required 
+                 data-toggle="tooltip" data-placement="top" title="Time between message sends (comma-separated)" />
+        </div>
+        <div class="col-md-4" style="--order: 6;">
+          <label for="pValues">Payload Sizes (bytes)</label>
+          <input type="text" class="form-control" id="pValues" placeholder="10,20" required 
+                 data-toggle="tooltip" data-placement="top" title="Packet sizes to send (comma-separated)" />
+        </div>
+      </div>
+    
+      <div class="form-row mt-3">
+        <div class="col-md-4" style="--order: 7;">
+          <label for="rValue">Number of Repetitions</label>
+          <input type="number" class="form-control" id="rValue" placeholder="3" required 
+                 data-toggle="tooltip" data-placement="top" title="Number of times each simulation will be repeated" />
+        </div>
+        <div class="col-md-4" style="--order: 8;">
+          <label for="DValue">Random Deployment</label>
+          <select class="form-control custom-select-vertical" id="DValue">
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+            <option value="both">Yes & No</option>
+          </select>
+        </div>
+        <div class="col-md-4" style="--order: 9;">
+          <label for="TValue">Poisson Traffic Model</label>
+          <select class="form-control custom-select-vertical" id="TValue">
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+            <option value="both">Yes & No</option>
+          </select>
+        </div>
+      </div>
+    
+      <div class="form-row mt-3">
+        <div class="col-md-4" style="--order: 10;">
+          <label for="Mec">Mechanism</label>
+          <select class="form-control custom-select-vertical" id="Mec">
+            <option value="GeoNet">GeoNet</option>
+            <option value="ADR">ADR</option>
+          </select>
+        </div>
+        <div class="col-md-8"></div> <!-- Vide pour équilibrer la ligne -->
+      </div>
+    
+      <button type="submit" class="btn btn-submit btn-block mt-4" id="btnExecuter">
+        <i class="fas fa-play-circle"></i> Run Simulation
+      </button>
+    </form>
+    
+    <button class="btn btn-simple mt-3" id="btnAfficherCourbes" onclick="loadFromHistory()">
+      <i class="fas fa-chart-line"></i> Retrieve Results
+    </button>
+    
+    <div id="loader">
+      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+        <span class="sr-only">Loading...</span>
+      </div>
+      <p class="mt-3">Simulation in progress... Please wait</p>
+    </div>
+
+    <div id="progressWrapper" class="mt-3" style="display: none;">
+      <div class="d-flex justify-content-between mb-2">
+        <label for="progressBar">Simulation progress:</label>
+        <span id="progressText">0%</span>
+      </div>
+      <div class="progress">
+        <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+             style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+      </div>
+    </div>
+    
+    <div id="resultContainer" class="result-container">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0"><i class="fas fa-file-alt"></i> Simulation Results</h4>
+        <div>
+          <button class="btn btn-danger" onclick="stopSimulation()">
+            <i class="fas fa-stop-circle"></i> Stop
+          </button>
+          <button class="btn btn-secondary ml-2" onclick="downloadResult()">
+            <i class="fas fa-download"></i> Download
+          </button>
+        </div>
+      </div>
+      <textarea id="resultOutput" rows="15" class="form-control" readonly></textarea>
+    </div>
+
+    <div id="resultGraphContainer" class="result-container">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0"><i class="fas fa-chart-bar"></i> Performance Charts</h4>
+        <button id="downloadZipBtn" class="btn btn-success">
+          <i class="fas fa-file-archive"></i> Download Charts
+        </button>
+      </div>
+      <div id="pdrChartContainer">
+        <div id="carousel" class="carousel slide" data-ride="carousel">
+          <ol class="carousel-indicators" id="carouselIndicators"></ol>
+          <div class="carousel-inner" id="carouselItems"></div>
+          <a class="carousel-control-prev" href="#carousel" role="button" data-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="sr-only">Previous</span>
+          </a>
+          <a class="carousel-control-next" href="#carousel" role="button" data-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="sr-only">Next</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+
+
+
+
+
+    // Add Font Awesome icons
+    const fontAwesome = document.createElement('link');
+    fontAwesome.rel = 'stylesheet';
+    fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css';
+    document.head.appendChild(fontAwesome);
+
+    let eventSource = null;
+    let groups = {};
+
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip();
+    });
+
+    document.getElementById("form").addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const dValues = document.getElementById("dValues").value;
+      const gValues = document.getElementById("gValues").value;
+      const tValue  = document.getElementById("tValue").value;
+      const aValues = document.getElementById("aValues").value;
+      const pValues = document.getElementById("pValues").value;
+      const rValue  = document.getElementById("rValue").value;
+      const DValue  = document.getElementById("DValue").value;
+      const TValue  = document.getElementById("TValue").value;
+      const Mec  = document.getElementById("Mec").value;
+
+      localStorage.setItem('simulationParams', JSON.stringify({
+        dValues, gValues, tValue, aValues, pValues, rValue, DValue, TValue
+      }));
+
+      const url = `/execute?dValues=${dValues}&gValues=${gValues}&tValue=${tValue}&aValues=${aValues}&pValues=${pValues}&rValue=${rValue}&DValue=${DValue}&TValue=${TValue}&Mec=${Mec}`;
+      eventSource = new EventSource(url);
+
+      document.getElementById("loader").style.display = "block";
+      const resultOutput = document.getElementById("resultOutput");
+      resultOutput.value = "";
+      document.getElementById("resultContainer").style.display = 'block';
+      document.getElementById("resultGraphContainer").style.display = 'none';
+
+      eventSource.onmessage = function(event) {
+        resultOutput.value += event.data + "\n";
+        resultOutput.scrollTop = resultOutput.scrollHeight;
+
+        document.getElementById("progressWrapper").style.display = "block";
+        const match = event.data.match(/Progress\s*:\s*\d+\s*\/\s*\d+\s*\((\d+\.?\d*)%\)/);
+        if (match) {
+          const percent = parseFloat(match[1]);
+          const progressBar = document.getElementById("progressBar");
+          progressBar.style.width = `${percent}%`;
+          progressBar.setAttribute("aria-valuenow", percent);
+          document.getElementById("progressText").innerText = `${percent}%`;
+        }
+
+        if (event.data.includes("OK")) {
+          eventSource.close();
+          document.getElementById("loader").style.display = "none";
+          resultOutput.value += "\n✅ Simulation completed successfully.\n";
+
+          const progressBar = document.getElementById("progressBar");
+          progressBar.style.width = "100%";
+          progressBar.setAttribute("aria-valuenow", 100);
+          document.getElementById("progressText").innerText = "100%";
+
+          const simulationText = resultOutput.value;
+          groups = readTxtFile(simulationText);
+          displayCharts(groups);
+        }
+      };
+
+      eventSource.onerror = function(event) {
+        console.error("SSE Error:", event);
+        if (eventSource) eventSource.close();
+        document.getElementById("loader").style.display = "none";
+      };
+    });
+
+    function stopSimulation() {
+      fetch('/stop')
+        .then(res => res.text())
+        .then(msg => {
+          if (eventSource) eventSource.close();
+          document.getElementById("resultOutput").value += "\n" + msg;
+          document.getElementById("loader").style.display = "none";
+          localStorage.removeItem('eventSourceState');
+          localStorage.removeItem('simulationParams');
+        });
+    }
+
+    function downloadResult() {
+      const content = document.getElementById("resultOutput").value;
+      const blob = new Blob([content], { type: 'text/plain' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `simulation_results_${new Date().toISOString().slice(0,10)}.txt`;
+      link.click();
+    }
+
+    function readTxtFile(file) {
+      const groups = {};
+      let context = "", appPeriod = "", payload = "", nGateway = "";
+      const lines = file.split("\n");
+
+      lines.forEach(line => {
+        line = line.trim();
+        if (line.includes("random_deployment") && line.includes("Poisson_traffic")) {
+          const matchDep = line.match(/random_deployment=(\w+)/);
+          const matchTraf = line.match(/Poisson_traffic=(\w+)/);
+          if (matchDep && matchTraf) {
+            context = `Random_deployment=${matchDep[1]} and Poisson_traffic=${matchTraf[1]}`;
+          }
+        } else if (line.includes("application period of")) {
+          const match = line.match(/application period of (\d+)/);
+          if (match) appPeriod = match[1];
+        } else if (line.includes("payload size of")) {
+          const match = line.match(/payload size of (\d+)/);
+          if (match) payload = match[1];
+        } else if (line.includes("For") && line.includes("Gateways")) {
+          const match = line.match(/For (\d+)/);
+          if (match) nGateway = match[1];
+        } else if (line.includes("|") && line.includes("Deployment=")) {
+          const parts = line.split("|").map(p => p.trim());
+          if (parts.length >= 4) {
+            try {
+              const node = parseInt(parts[0]);
+              const pdr = parseFloat(parts[3]) * 100;
+              const curveName = `${context} | Period=${appPeriod} | Payload=${payload} | GW=${nGateway}`;
+              if (!groups[curveName]) groups[curveName] = [];
+              groups[curveName].push({ node, pdr });
+            } catch (e) {
+              console.error("Data processing error:", e);
+            }
+          }
+        }
+      });
+      return groups;
+    }
+
+    function clearCharts() {
+      const carouselItems = document.getElementById("carouselItems");
+      carouselItems.innerHTML = "";
+      const carouselIndicators = document.getElementById("carouselIndicators");
+      carouselIndicators.innerHTML = "";
+    }
+
+    function loadFromHistory() {
+      // Show loader during loading
+      document.getElementById("loader").style.display = "block";
+      document.getElementById("progressWrapper").style.display = "block";
+      
+      fetch('/api/history')
+        .then(response => response.text())
+        .then(text => {
+          const resultOutput = document.getElementById("resultOutput");
+          resultOutput.value = text;
+          document.getElementById("resultContainer").style.display = 'block';
+          document.getElementById("loader").style.display = "none";
+
+          const historyGroups = readTxtFile(text);
+          displayCharts(historyGroups);
+          
+          // Update progress bar
+          updateProgressFromHistory(text);
+          
+          document.getElementById("downloadZipBtn").onclick = function() {
+            downloadZip(historyGroups);
+          };
+        })
+        .catch(err => {
+          console.error("Error loading history:", err);
+          alert("Unable to load history file.");
+          document.getElementById("loader").style.display = "none";
+        });
+    }
+
+    function updateProgressFromHistory(historyFile) {
+      const lines = historyFile.split("\n");
+      let progress = 0;
+      let maxProgress = 0;
+
+      // Find maximum progress in file
+      lines.forEach(line => {
+        const match = line.match(/Progress\s*:\s*(\d+)\s*\/\s*(\d+)\s*\((\d+\.?\d*)%\)/);
+        if (match) {
+          const current = parseInt(match[1]);
+          const total = parseInt(match[2]);
+          const percent = parseFloat(match[3]);
+          
+          if (percent > progress) {
+            progress = percent;
+          }
+          if (total > maxProgress) {
+            maxProgress = total;
+          }
+        }
+      });
+
+      // Update progress bar
+      const progressBar = document.getElementById("progressBar");
+      const progressText = document.getElementById("progressText");
+      
+      if (maxProgress > 0) {
+        progressBar.style.width = `${progress}%`;
+        progressBar.setAttribute("aria-valuenow", progress);
+        progressText.innerText = `${progress}% (${Math.round(progress * maxProgress / 100)}/${maxProgress})`;
+      } else {
+        progressBar.style.width = "100%";
+        progressBar.setAttribute("aria-valuenow", 100);
+        progressText.innerText = "100% (historical data)";
+      }
+    }
+
+    function displayCharts(groups) {
+      document.getElementById("loader").style.display = "none";
+      document.getElementById("resultGraphContainer").style.display = "block";
+      clearCharts();
+
+      const carouselIndicators = document.getElementById("carouselIndicators");
+      
+      Object.keys(groups).forEach((curveName, index) => {
+        const values = groups[curveName].sort((a, b) => a.node - b.node);
+        const x = values.map(v => v.node);
+        const y = values.map(v => v.pdr);
+
+        // Create carousel indicator
+        const indicator = document.createElement("li");
+        indicator.dataset.target = "#carousel";
+        indicator.dataset.slideTo = index;
+        if (index === 0) indicator.classList.add("active");
+        carouselIndicators.appendChild(indicator);
+
+        // Create carousel item
+        const carouselItem = document.createElement("div");
+        carouselItem.classList.add("carousel-item");
+        if (index === 0) carouselItem.classList.add("active");
+
+        const canvas = document.createElement("canvas");
+        canvas.id = `chart${index}`;
+        carouselItem.appendChild(canvas);
+        document.getElementById("carouselItems").appendChild(carouselItem);
+
+        // Create chart
+        new Chart(canvas, {
+          type: 'line',
+          data: {
+            labels: x,
+            datasets: [{
+              label: curveName,
+              data: y,
+              borderColor: getRandomColor(),
+              backgroundColor: 'rgba(52, 152, 219, 0.1)',
+              borderWidth: 2,
+              fill: true,
+              tension: 0.3,
+              pointBackgroundColor: '#fff',
+              pointBorderColor: getRandomColor(),
+              pointRadius: 4,
+              pointHoverRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              title: {
+                display: true,
+                text: curveName,
+                font: {
+                  size: 16,
+                  weight: 'bold'
+                },
+                padding: {
+                  top: 10,
+                  bottom: 20
+                }
+              },
+              legend: {
+                display: false
+              },
+              tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                titleFont: {
+                  size: 14,
+                  weight: 'bold'
+                },
+                bodyFont: {
+                  size: 12
+                },
+                padding: 10,
+                usePointStyle: true,
+                callbacks: {
+                  label: function(context) {
+                    return `Node ${context.label}: ${context.raw.toFixed(2)}%`;
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                title: {
+                  display: true,
+                  text: 'Number of Nodes',
+                  font: {
+                    weight: 'bold'
+                  }
+                },
+                grid: {
+                  display: false
+                }
+              },
+              y: {
+                title: {
+                  display: true,
+                  text: 'Packet Delivery Ratio (%)',
+                  font: {
+                    weight: 'bold'
+                  }
+                },
+                min: 0,
+                max: 100,
+                ticks: {
+                  callback: function(value) {
+                    return value + '%';
+                  }
+                }
+              }
+            }
+          }
+        });
+      });
+      
+      $('#carousel').carousel();
+    }
+
+    function getRandomColor() {
+      const colors = [
+        '#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6',
+        '#1abc9c', '#d35400', '#34495e', '#16a085', '#c0392b'
+      ];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedParams = JSON.parse(localStorage.getItem('simulationParams'));
+      if (savedParams) {
+        document.getElementById("dValues").value = savedParams.dValues || '';
+        document.getElementById("gValues").value = savedParams.gValues || '';
+        document.getElementById("tValue").value  = savedParams.tValue || '';
+        document.getElementById("aValues").value = savedParams.aValues || '';
+        document.getElementById("pValues").value = savedParams.pValues || '';
+        document.getElementById("rValue").value  = savedParams.rValue || '';
+        document.getElementById("DValue").value  = savedParams.DValue || 'false';
+        document.getElementById("TValue").value  = savedParams.TValue || 'false';
+      }
+    });
+
+    function downloadZip(groups) {
+      const zip = new JSZip();
+      const chartFiles = [];
+
+      // Create .png file for each generated chart
+      Object.keys(groups).forEach((curveName, index) => {
+        const canvas = document.getElementById(`chart${index}`);
+        if (canvas) {
+          // Convert each chart to PNG image
+          const imgData = canvas.toDataURL("image/png");
+
+          // Convert image to binary
+          const byteString = atob(imgData.split(',')[1]);
+          const byteArray = new Uint8Array(byteString.length);
+          for (let i = 0; i < byteString.length; i++) {
+            byteArray[i] = byteString.charCodeAt(i);
+          }
+
+          // Add image to .zip file
+          zip.file(`${curveName.replace(/[\/\\?%*:|"<>]/g, '_')}.png`, byteArray);
+        }
+      });
+
+      // Generate and download .zip file
+      zip.generateAsync({ type: "blob" })
+        .then(function(content) {
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(content);
+          link.download = `simulation_charts_${new Date().toISOString().slice(0,10)}.zip`;
+          link.click();
+        });
+    }
+
+
+
+    document.addEventListener("DOMContentLoaded", function() {
+    const accountBtn = document.getElementById("accountBtn");
+    const accountMenu = document.getElementById("accountMenu");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const dropdownArrow = document.getElementById("dropdownArrow");
+
+    // Animation de la flèche et du menu
+    accountBtn.addEventListener("click", function(e) {
+        e.stopPropagation();
+        
+        // Basculer l'état du menu
+        const isOpen = accountMenu.classList.toggle("hidden");
+        
+        // Animation de la flèche
+        dropdownArrow.style.transform = isOpen ? "rotate(180deg)" : "rotate(0deg)";
+        
+        // Animation du menu
+        if (!isOpen) {
+            accountMenu.classList.remove("opacity-0", "translate-y-1");
+        } else {
+            setTimeout(() => {
+                accountMenu.classList.add("opacity-0", "translate-y-1");
+            }, 200);
+        }
+    });
+
+    // Fermer le menu quand on clique ailleurs
+    document.addEventListener("click", function() {
+        if (!accountMenu.classList.contains("hidden")) {
+            accountMenu.classList.add("hidden", "opacity-0", "translate-y-1");
+            dropdownArrow.style.transform = "rotate(0deg)";
+        }
+    });
+
+    // Empêcher la fermeture quand on clique dans le menu
+    accountMenu.addEventListener("click", function(e) {
+        e.stopPropagation();
+    });
+
+    // Gestion de la déconnexion
+    logoutBtn.addEventListener("click", function(e) {
+        e.preventDefault();
+        // Ajouter ici la logique de déconnexion si nécessaire
+        window.location.href = "/connexion.html";
+    });
+});
+  </script>
+
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
