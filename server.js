@@ -3,6 +3,7 @@ const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 const { exec } = require('child_process');
 const fs = require('fs');
+const kill = require('tree-kill');
 
 const app = express();
 const port = 3000;
@@ -21,7 +22,7 @@ app.use((req, res, next) => {
 });
 
 // -------------------
-// Base de donn�es utilisateurs
+// Base de données utilisateurs
 // -------------------
 const db = new sqlite3.Database('./users.db');
 db.serialize(() => {
@@ -38,7 +39,7 @@ db.serialize(() => {
 app.post('/connexion', (req, res) => {
   const { username, password } = req.body;
   db.get("SELECT * FROM users WHERE username = ? AND password = ?", [username, password], (err, row) => {
-    if (err) return res.status(500).send("Erreur de base de donn�es.");
+    if (err) return res.status(500).send("Erreur de base de données.");
     if (row) return res.redirect('/choix.html');
     return res.status(401).send("Nom d'utilisateur ou mot de passe incorrect.");
   });
@@ -54,7 +55,7 @@ app.post('/connexion_Ang', (req, res) => {
 });
 
 // -------------------
-// Cr�ation de compte (FR et EN)
+// Création de compte (FR et EN)
 // -------------------
 app.post('/creer-compte', (req, res) => {
   const { username, password, ['confirm-password']: confirmPassword } = req.body;
@@ -63,8 +64,8 @@ app.post('/creer-compte', (req, res) => {
   }
   db.run("INSERT INTO users (username, password) VALUES (?, ?)", [username, password], function (err) {
     if (err) {
-      if (err.message.includes('UNIQUE')) return res.send("Nom d'utilisateur d�j� utilis�.");
-      return res.send("Erreur lors de la cr�ation du compte.");
+      if (err.message.includes('UNIQUE')) return res.send("Nom d'utilisateur déjà utilisé.");
+      return res.send("Erreur lors de la création du compte.");
     }
     res.redirect('/connexion.html?success=1');
   });
@@ -84,7 +85,6 @@ app.post('/creer-compte_Ang', (req, res) => {
   });
 });
 
-
 // -------------------
 // Simulation NS3-LoRaWAN (SSE)
 // -------------------
@@ -97,22 +97,26 @@ app.get('/execute', (req, res) => {
   const rValue = req.query.rValue || '3';
   const DValue = req.query.DValue || 'false';
   const TValue = req.query.TValue || 'false';
-  const mecanisme = req.query.Mec || 'GeoNet';
+  const mecanisme = req.query.Mecanisme || 'LLNRM';
 
   const ns3Path = "/home/mohamed-ali/ns-3-dev";
-
   let command = "";
 
- switch (mec) {
-  case "ADR":
-    command = `${ns3Path}/simulation_script_ADR.sh -d "${dValues}" -g "${gValues}" -t "${tValue}" -a "${aValues}" -p "${pValues}" -r "${rValue}" -D "${DValue}" -T "${TValue}"`;
-    break;
+  switch (mecanisme) {
+    case "LLNRM":
+      command = `wsl bash ${ns3Path}/simulation_script_LLNRM.sh -d "${dValues}" -g "${gValues}" -t "${tValue}" -a "${aValues}" -p "${pValues}" -r "${rValue}" -D "${DValue}" -T "${TValue}"`;
+      break;
 
-  default:
-    command = `${ns3Path}/simulation_script_GeoNet.sh -d "${dValues}" -g "${gValues}" -t "${tValue}" -a "${aValues}" -p "${pValues}" -r "${rValue}" -D "${DValue}" -T "${TValue}"`;
-    break;
-}
-  console.log("Commande ex�cut�e (SSE):", command);
+    case "ADR":
+      command = `wsl bash ${ns3Path}/simulation_script_ADR.sh -d "${dValues}" -g "${gValues}" -t "${tValue}" -a "${aValues}" -p "${pValues}" -r "${rValue}" -D "${DValue}" -T "${TValue}"`;
+      break;
+
+    default:
+      command = `wsl bash ${ns3Path}/simulation.sh -d "${dValues}" -g "${gValues}" -t "${tValue}" -a "${aValues}" -p "${pValues}" -r "${rValue}" -D "${DValue}" -T "${TValue}"`;
+      break;
+  }
+
+  console.log("Commande exécutée (SSE):", command);
 
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
@@ -129,7 +133,7 @@ app.get('/execute', (req, res) => {
   });
 
   currentChild.on('exit', () => {
-    res.write('data: Simulation termin�e\n\n');
+    res.write('data: Simulation terminée\n\n');
     res.write('data: OK\n\n');
     res.end();
     currentChild = null;
@@ -145,27 +149,24 @@ app.get('/execute', (req, res) => {
 // -------------------
 // Stopper simulation
 // -------------------
-const kill = require('tree-kill');
-
 app.get('/stop', (req, res) => {
   if (currentChild) {
     kill(currentChild.pid, 'SIGTERM', (err) => {
       if (err) {
-        console.error('Erreur lors de larr�t de la simulation :', err);
-        return res.status(500).send('Erreur lors de larr�t de la simulation.');
+        console.error('Erreur lors de l’arrêt de la simulation :', err);
+        return res.status(500).send('Erreur lors de l’arrêt de la simulation.');
       }
-      console.log('Simulation arr�t�e avec succ�s.');
+      console.log('Simulation arrêtée avec succès.');
       currentChild = null;
-      res.send('Simulation arr�t�e.');
+      res.send('Simulation arrêtée.');
     });
   } else {
     res.send('Aucune simulation en cours.');
   }
 });
 
-
 // -------------------
-// Simulation avanc�e
+// Simulation avancée
 // -------------------
 app.get('/advanced-execute', (req, res) => {
   const appPeriod = parseInt(req.query.appPeriod) || 12;
@@ -176,12 +177,54 @@ app.get('/advanced-execute', (req, res) => {
   const simulationTime = parseInt(req.query.simulationTime) || 60;
   const batiments = req.query.Batiments === 'true';
   const sftable = req.query.sftable || '';
-  const manualCoordinates = req.query.manualCoordinates || '';  
-  const manualPT = req.query.manualPT || '';  
-
+  const nRuns = parseInt(req.query.nRuns) || 1;   // 🔥 récupération du champ ajouté côté client
+// 🔥 Récupérer le code envoyé par le client
+const mainCode = req.query.mainCode || '';
 
   if (isNaN(nGateways) || isNaN(nDevices) || nGateways <= 0 || nDevices <= 0) {
-    return res.status(400).send('Param�tres invalides.');
+    return res.status(400).send('Paramètres invalides.');
+  }
+
+  let gatewayPositions = req.query.gatewayPositions;
+  if (!gatewayPositions) {
+    const presets = {
+      1: '0,0,15',
+      2: '0,0,15;4000,4000,15',
+      3: '0,0,15;4000,4000,15;-4000,-4000,15',
+      4: '0,0,15;4000,4000,15;-4000,-4000,15;-4000,4000,15',
+      5: '0,0,15;4000,4000,15;-4000,-4000,15;-4000,4000,15;4000,-4000,15'
+    };
+    gatewayPositions = presets[nGateways] || presets[1];
+  }
+
+  const ns3Path = "/home/mohamed-ali/ns-3-dev";
+  const command = `wsl ${ns3Path}/ns3 run "lorawan-energy-model-example.cc --appPeriod=${appPeriod} --payload=${payload} --nGateways=${nGateways} --nDevices=${nDevices} --Batiments=${batiments} --gatewayPositions=${gatewayPositions} --radius=${radius} --simulationTime=${simulationTime}"`;
+
+  console.log("Commande exécutée (avancée):", command);
+
+  exec(command, (error, stdout, stderr) => {
+    if (error) return res.status(500).send(`Erreur: ${error.message}`);
+    if (stderr) return res.status(500).send(`Erreur stderr: ${stderr}`);
+    const results = stdout.split('\n').filter(line => line.trim() !== '');
+    res.json(results);
+  });
+});
+
+// -------------------
+// Simulation avancée
+// -------------------
+app.get('/advanced-execute-chercher', (req, res) => {
+  const appPeriod = parseInt(req.query.appPeriod) || 12;
+  const payload = parseInt(req.query.payload) || 50;
+  const nGateways = parseInt(req.query.nGateways);
+  const nDevices = parseInt(req.query.nDevices) || 10;
+  const radius = parseInt(req.query.radius) || 7500;
+  const simulationTime = parseInt(req.query.simulationTime) || 60;
+  const batiments = req.query.Batiments === 'true';
+  const mainCode = req.query.mainCode || '';
+
+  if (isNaN(nGateways) || isNaN(nDevices) || nGateways <= 0 || nDevices <= 0) {
+    return res.status(400).send('Paramètres invalides.');
   }
 
   let gatewayPositions = req.query.gatewayPositions;
@@ -198,17 +241,30 @@ app.get('/advanced-execute', (req, res) => {
 
   const ns3Path = "/home/mohamed-ali/ns-3-dev";
 
-  const command = `${ns3Path}/ns3 run 'complete-network-GeoNet_Man.cc --appPeriod=${appPeriod} --payload=${payload} --nGateways=${nGateways} --nDevices=${nDevices} --Batiments=${batiments} --gatewayPositions=${gatewayPositions} --radius=${radius} --simulationTime=${simulationTime} --manualCoordinates=${manualCoordinates} --manualPT=${manualPT}'`;
+  // 1️⃣ Commande 1 : lancer network-server-example.cc (sans envoyer au client)
+  const cmd1 = `wsl ${ns3Path}/ns3 run "network-server-example.cc --appPeriod=${appPeriod} --payload=${payload} --nGateways=${nGateways} --nDevices=${nDevices} --Batiments=${batiments} --gatewayPositions=${gatewayPositions} --radius=${radius} --simulationTime=${simulationTime}  --mainCode=${mainCode}"`;
 
-  console.log("Commande ex�cut�e (avanc�e):", command);
+  // 2️⃣ Commande 2 : lancer frame-counter-update.cc (on renvoie le résultat au client)
+  const cmd2 = `wsl ${ns3Path}/ns3 run "frame-counter-update.cc --appPeriod=${appPeriod} --payload=${payload} --nGateways=${nGateways} --nDevices=${nDevices} --Batiments=${batiments} --gatewayPositions=${gatewayPositions} --radius=${radius} --simulationTime=${simulationTime}"`;
 
-  exec(command, (error, stdout, stderr) => {
-    if (error) return res.status(500).send(`Erreur: ${error.message}`);
-    if (stderr) return res.status(500).send(`Erreur stderr: ${stderr}`);
-    const results = stdout.split('\n').filter(line => line.trim() !== '');
-    res.json(results);
+  console.log("Exécution 1:", cmd1);
+
+  exec(cmd1, (error1, stdout1, stderr1) => {
+    if (error1) return res.status(500).send(`Erreur étape 1: ${error1.message}`);
+    if (stderr1) console.error("⚠️ stderr étape 1:", stderr1);
+
+    console.log("Exécution 2:", cmd2);
+
+    exec(cmd2, (error2, stdout2, stderr2) => {
+      if (error2) return res.status(500).send(`Erreur étape 2: ${error2.message}`);
+      if (stderr2) console.warn("⚠️ Warnings étape 2:", stderr2);
+
+      const results = stdout2.split('\n').filter(line => line.trim() !== '');
+      res.json(results); // ✅ On envoie uniquement le résultat de la 2ème commande
+    });
   });
 });
+
 
 // -------------------
 // Historique
@@ -250,5 +306,5 @@ app.get('/', (req, res) => {
 // Lancer le serveur
 // -------------------
 app.listen(port, () => {
-  console.log(` Serveur lanc� sur http://localhost:${port}`);
+  console.log(`🚀 Serveur lancé sur http://localhost:${port}`);
 });
