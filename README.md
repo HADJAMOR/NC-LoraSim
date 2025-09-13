@@ -1,6 +1,6 @@
 # NS-LoRaSim
 
-![NS-LoRaSim](https://img.shields.io/badge/NS--LoRaSim-No--Code%20Platform-800080?style=for-the-badge&logo=scikitlearn&logoColor=white)
+![NS-LoRaSim](https://img.shields.io/badge/NS--LoRaSim-Network%20Simulation-228B22?style=for-the-badge&logo=gnometerminal&logoColor=white)
 
 ---
 
