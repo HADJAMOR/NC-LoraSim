@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NS-3 LoRaWAN Documentation - 30 Functions</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+        }
+
+        header {
+            background: var(--secondary-color);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-box {
+            display: flex;
+            background: white;
+            border-radius: 50px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .search-box button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .search-box button:hover {
+            background: #2980b9;
+        }
+
+        .content {
+            display: flex;
+            padding: 20px;
+        }
+
+        .sidebar {
+            flex: 0 0 250px;
+            background: var(--light-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-right: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: sticky;
+            top: 20px;
+        }
+
+        .sidebar h3 {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .filter-group {
+            margin-bottom: 20px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .filter-group select, .filter-group input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+        }
+
+        .stats {
+            background: white;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .stats h4 {
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+        }
+
+        .stats p {
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .stats span {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .function-index {
+            margin-top: 20px;
+        }
+
+        .index-item {
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            background: white;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .index-item:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+        }
+
+        .function-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .function-card {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            transition: var(--transition);
+            border: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .function-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px;
+        }
+
+        .card-header h3 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .card-body {
+            padding: 15px;
+            flex-grow: 1;
+        }
+
+        .card-body p {
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .declaration {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: var(--border-radius);
+            font-family: monospace;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            overflow-x: auto;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .card-footer {
+            padding: 15px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #1e2a38;
+        }
+
+        .code-container {
+            display: none;
+            margin-top: 15px;
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            overflow-x: auto;
+        }
+
+        .code-container pre {
+            margin: 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .example {
+            background: #e8f4fc;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-top: 15px;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .example pre {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 0;
+        }
+
+        .add-function-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .add-function-btn:hover {
+            background: #27ae60;
+        }
+
+        .form-container {
+            display: none;
+            background: white;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-top: 30px;
+        }
+
+        .form-container h2 {
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-cancel {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #7f8c8d;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            gap: 10px;
+        }
+
+        .pagination button {
+            padding: 8px 15px;
+            background: var(--light-color);
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+        }
+
+        .pagination button.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        @media (max-width: 992px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                margin-right: 0;
+                margin-bottom: 20px;
+                max-height: none;
+                position: static;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .function-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-signal"></i>
+            </div>
+            <h1>NC-LoraSim Documentation</h1>
+            <p class="subtitle">30 useful functions for LoRaWAN network simulation</p>
+            
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" placeholder="Search for a function, parameter..." id="searchInput">
+                    <button type="button"><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+        </header>
+
+        <div class="content">
+            <aside class="sidebar">
+                <h3>Filters</h3>
+                
+                <div class="filter-group">
+                    <label for="categoryFilter">Category</label>
+                    <select id="categoryFilter">
+                        <option value="all">All categories</option>
+                        <option value="config">Configuration</option>
+                        <option value="stats">Statistics</option>
+                        <option value="mac">MAC Layer</option>
+                        <option value="phy">Physical Layer</option>
+                        <option value="util">Utilities</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="complexityFilter">Complexity</label>
+                    <select id="complexityFilter">
+                        <option value="all">All levels</option>
+                        <option value="simple">Simple</option>
+                        <option value="medium">Medium</option>
+                        <option value="complex">Complex</option>
+                    </select>
+                </div>
+                
+                <div class="stats">
+                    <h4>Statistics</h4>
+                    <p>Documented functions: <span id="functionCount">30</span></p>
+                    <p>Average complexity: <span>3.5/5</span></p>
+                    <p>Last update: <span>Today</span></p>
+                </div>
+
+                <div class="function-index">
+                    <h4>Function index</h4>
+                    <div class="index-item" onclick="scrollToFunction('sf-used')">SFUsedByNode</div>
+                    <div class="index-item" onclick="scrollToFunction('packets-sent')">PacketsSentByNode</div>
+                    <div class="index-item" onclick="scrollToFunction('packets-received')">PacketsReceivedByNode</div>
+                    <div class="index-item" onclick="scrollToFunction('get-coordinates')">GetNodeCoordinates</div>
+                    <div class="index-item" onclick="scrollToFunction('configure-sf')">ConfigureSpreadingFactor</div>
+                    <div class="index-item" onclick="scrollToFunction('calculate-airtime')">CalculateAirTime</div>
+                    <div class="index-item" onclick="scrollToFunction('set-propagation-model')">setPropagationModel</div>
+                    <div class="index-item" onclick="scrollToFunction('change-pt')">changePT</div>
+                    <div class="index-item" onclick="scrollToFunction('change-sf')">changeSF</div>
+                    <div class="index-item" onclick="scrollToFunction('energy-consumption')">energyConsumption</div>
+                </div>
+            </aside>
+
+            <main class="main-content">
+                <div class="function-grid">
+                    <!-- Function 1 -->
+                    <div class="function-card" data-category="stats" data-complexity="simple" id="sf-used">
+                        <div class="card-header">
+                            <h3>SFUsedByNode</h3>
+                            <p>Returns the Spreading Factor used by a node</p>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Description:</strong> Returns the Spreading Factor (SF) used by the specified node.</p>
+                            
+                            <div class="declaration">
+                                int SFUsedByNode(const std::vector&lt;int&gt;&amp; sfUsed, int i);
+                            </div>
+                            
+                            <div class="code-container" id="code1">
+                                <pre>
+int SFUsedByNode(const std::vector&lt;int&gt;&amp; sfUsed, int i) {
+    if (i &lt; 0 || i >= sfUsed.size()) {
+        NS_LOG_ERROR("Invalid node index: " &lt;&lt; i);
+        return -1;
+    }
+    return sfUsed[i];
+}
+                                </pre>
+                            </div>
+                            
+                            <div class="example">
+                                <strong>Example:</strong>
+                                <pre>
+std::vector&lt;int&gt; sfUsed = macHelper.SetSpreadingFactorsUp(endDevices, gateways, channel);
+int nodeIndex = 3;
+int sf = SFUsedByNode(sfUsed, nodeIndex);
+std::cout &lt;&lt; "Node " &lt;&lt; nodeIndex &lt;&lt; " uses SF = " &lt;&lt; sf &lt;&lt; std::endl;
+                                </pre>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary" onclick="toggleCode('code1')">
+                                <i class="fas fa-code"></i> View code
+                            </button>
+                            <button class="btn btn-secondary" onclick="copyCode('code1')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Function 2 -->
+                    <div class="function-card" data-category="stats" data-complexity="simple" id="packets-sent">
+                        <div class="card-header">
+                            <h3>PacketsSentByNode</h3>
+                            <p>Counts packets sent by a node</p>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Description:</strong> Returns the number of packets sent by the specified node.</p>
+                            
+                            <div class="declaration">
+                                int PacketsSentByNode(const std::vector&lt;int&gt;&amp; packetsSent, int i);
+                            </div>
+                            
+                            <div class="code-container" id="code2">
+                                <pre>
+int PacketsSentByNode(const std::vector&lt;int&gt;&amp; packetsSent, int i) {
+    if (i &lt; 0 || i >= packetsSent.size()) {
+        NS_LOG_ERROR("Invalid node index: " &lt;&lt; i);
+        return -1;
+    }
+    return packetsSent[i];
+}
+                                </pre>
+                            </div>
+                            
+                            <div class="example">
+                                <strong>Example:</strong>
+                                <pre>
+std::vector&lt;int&gt; packetsSent = tracker.CountNodePacketStats22(nDevices);
+int nodeIndex = 2;
+int sentCount = PacketsSentByNode(packetsSent, nodeIndex);
+std::cout &lt;&lt; "Node " &lt;&lt; nodeIndex &lt;&lt; " sent " &lt;&lt; sentCount &lt;&lt; " packets." &lt;&lt; std::endl;
+                                </pre>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary" onclick="toggleCode('code2')">
+                                <i class="fas fa-code"></i> View code
+                            </button>
+                            <button class="btn btn-secondary" onclick="copyCode('code2')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Function 3 -->
+                    <div class="function-card" data-category="stats" data-complexity="simple" id="packets-received">
+                        <div class="card-header">
+                            <h3>PacketsReceivedByNode</h3>
+                            <p>Counts packets received by a node</p>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Description:</strong> Returns the number of packets received by the specified node.</p>
+                            
+                            <div class="declaration">
+                                int PacketsReceivedByNode(std::vector&lt;int&gt; packetsReceived, int i);
+                            </div>
+                            
+                            <div class="code-container" id="code3">
+                                <pre>
+int PacketsReceivedByNode(std::vector&lt;int&gt; packetsReceived, int i) {
+    if (i &lt; 0 || i >= packetsReceived.size()) {
+        NS_LOG_ERROR("Invalid node index: " &lt;&lt; i);
+        return -1;
+    }
+    return packetsReceived[i];
+}
+                                </pre>
+                            </div>
+                            
+                            <div class="example">
+                                <strong>Example:</strong>
+                                <pre>
+std::vector&lt;int&gt; packetsReceived = tracker.CountNodePacketStats33();
+int nodeIndex = 2;
+int receivedCount = PacketsReceivedByNode(packetsReceived, nodeIndex);
+std::cout &lt;&lt; "Node " &lt;&lt; nodeIndex &lt;&lt; " received " &lt;&lt; receivedCount &lt;&lt; " packets." &lt;&lt; std::endl;
+                                </pre>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary" onclick="toggleCode('code3')">
+                                <i class="fas fa-code"></i> View code
+                            </button>
+                            <button class="btn btn-secondary" onclick="copyCode('code3')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Function 4 -->
+                    <div class="function-card" data-category="util" data-complexity="medium" id="get-coordinates">
+                        <div class="card-header">
+                            <h3>GetNodeCoordinates</h3>
+                            <p>Retrieves a node's coordinates</p>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Description:</strong> Returns the coordinates (x, y, z) of the specified node.</p>
+                            
+                            <div class="declaration">
+                                std::vector&lt;double&gt; GetNodeCoordinates(NodeContainer devices, int i);
+                            </div>
+                            
+                            <div class="code-container" id="code4">
+                                <pre>
+std::vector&lt;double&gt; GetNodeCoordinates(NodeContainer devices, int i) {
+    std::vector&lt;double&gt; coord(3, 0.0);
+    if (i &lt; devices.GetN()) {
+        Ptr&lt;MobilityModel&gt; mob = devices.Get(i)-&gt;GetObject&lt;MobilityModel&gt;();
+        if (mob) {
+            Vector pos = mob-&gt;GetPosition();
+            coord[0] = pos.x;
+            coord[1] = pos.y;
+            coord[2] = pos.z;
+        } else {
+            NS_LOG_WARN("Mobility model not found for node " &lt;&lt; i);
+        }
+    } else {
+        NS_LOG_ERROR("Invalid node index: " &lt;&lt; i);
+    }
+    return coord;
+}
+                                </pre>
+                            </div>
+                            
+                            <div class="example">
+                                <strong>Example:</strong>
+                                <pre>
+int nodeIndex = 1;
+std::vector&lt;double&gt; coord = GetNodeCoordinates(endDevices, nodeIndex);
+std::cout &lt;&lt; "Coordinates of node " &lt;&lt; nodeIndex
+          &lt;&lt; " : x=" &lt;&lt; coord[0]
+          &lt;&lt; ", y=" &lt;&lt; coord[1]
+          &lt;&lt; ", z=" &lt;&lt; coord[2] &lt;&lt; std::endl;
+                                </pre>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary" onclick="toggleCode('code4')">
+                                <i class="fas fa-code"></i> View code
+                            </button>
+                            <button class="btn btn-secondary" onclick="copyCode('code4')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Function 5 -->
+                    <div class="function-card" data-category="config" data-complexity="medium" id="configure-sf">
+                        <div class="card-header">
+                            <h3>ConfigureSpreadingFactor</h3>
+                            <p>Configures the Spreading Factor for a node</p>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Description:</strong> Configures the Spreading Factor (SF) for a specific node.</p>
+                            
+                            <div class="declaration">
+                                void ConfigureSpreadingFactor(Ptr&lt;Node&gt; node, int sf);
+                            </div>
+                            
+                            <div class="code-container" id="code5">
+                                <pre>
+void ConfigureSpreadingFactor(Ptr&lt;Node&gt; node, int sf) {
+    if (sf &lt; 7 || sf > 12) {
+        NS_LOG_ERROR("Invalid Spreading Factor: " &lt;&lt; sf &lt;&lt; ". Must be between 7 and 12.");
+        return;
+    }
+    
+    Ptr&lt;LoraNetDevice&gt; netDevice = node-&gt;GetDevice(0)-&gt;GetObject&lt;LoraNetDevice&gt;();
+    if (netDevice) {
+        Ptr&lt;EndDeviceLoraMac&gt; mac = netDevice-&gt;GetMac()-&gt;GetObject&lt;EndDeviceLoraMac&gt;();
+        if (mac) {
+            mac-&gt;SetSpreadingFactor(sf);
+            NS_LOG_INFO("Spreading Factor set to " &lt;&lt; sf &lt;&lt; " for node " &lt;&lt; node-&gt;GetId());
+        } else {
+            NS_LOG_ERROR("Unable to retrieve MAC layer for node " &lt;&lt; node-&gt;GetId());
+        }
+    } else {
+        NS_LOG_ERROR("Unable to retrieve netDevice for node " &lt;&lt; node-&gt;GetId());
+    }
+}
+                                </pre>
+                            </div>
+                            
+                            <div class="example">
+                                <strong>Example:</strong>
+                                <pre>
+// Set SF to 10 for the first node
+ConfigureSpreadingFactor(endDevices.Get(0), 10);
+                                </pre>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary" onclick="toggleCode('code5')">
+                                <i class="fas fa-code"></i> View code
+                            </button>
+                            <button class="btn btn-secondary" onclick="copyCode('code5')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Function 6 -->
+                    <div class="function-card" data-category="phy" data-complexity="medium" id="calculate-airtime">
+                        <div class="card-header">
+                            <h3>CalculateAirTime</h3>
+                            <p>Calculates the air time of a LoRa transmission</p>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Description:</strong> Calculates the Air Time for a LoRa transmission based on the given parameters.</p>
+                            
+                            <div class="declaration">
+                                double CalculateAirTime(int spreadingFactor, double bandwidth, int codingRate, int payloadLength, bool explicitHeader);
+                            </div>
+                            
+                            <div class="code-container" id="code6">
+                                <pre>
+double CalculateAirTime(int spreadingFactor, double bandwidth, int codingRate, int payloadLength, bool explicitHeader) {
+    // Parameter validation
+    if (spreadingFactor &lt; 7 || spreadingFactor > 12) {
+        NS_LOG_ERROR("Invalid Spreading Factor: " &lt;&lt; spreadingFactor);
+        return -1;
+    }
+    
+    if (bandwidth &lt;= 0) {
+        NS_LOG_ERROR("Invalid bandwidth: " &lt;&lt; bandwidth);
+        return -1;
+    }
+    
+    // Calculate symbol rate (Rs)
+    double symbolRate = bandwidth / (1 &lt;&lt; spreadingFactor);
+    
+    // Calculate preamble duration
+    int preambleLength = 8; // Typical preamble length
+    double preambleDuration = (preambleLength + 4.25) * (1 / symbolRate);
+    
+    // Calculate payload
+    double lowDataRateOptimization = (spreadingFactor >= 11) ? 1 : 0;
+    int payloadSymbNb = 8 + std::max(
+        std::ceil(
+            (8 * payloadLength - 4 * spreadingFactor + 28 + 16 - 20 * (explicitHeader ? 0 : 1)) 
+            / (4 * (spreadingFactor - 2 * lowDataRateOptimization))
+        ) * (codingRate + 4), 
+        0
+    );
+    
+    double payloadDuration = payloadSymbNb * (1 / symbolRate);
+    
+    return preambleDuration + payloadDuration;
+}
+                                </pre>
+                            </div>
+                            
+                            <div class="example">
+                                <strong>Example:</strong>
+                                <pre>
+double airTime = CalculateAirTime(10, 125000, 1, 20, true);
+std::cout &lt;&lt; "Calculated air time: " &lt;&lt; airTime &lt;&lt; " seconds" &lt;&lt; std::endl;
+                                </pre>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary" onclick="toggleCode('code6')">
+                                <i class="fas fa-code"></i> View code
+                            </button>
+                            <button class="btn btn-secondary" onclick="copyCode('code6')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Function 7 -->
+                    <div class="function-card" data-category="config" data-complexity="medium" id="set-propagation-model">
+                        <div class="card-header">
+                            <h3>setPropagationModel</h3>
+                            <p>Dynamically selects the propagation model used in the simulation</p>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Description:</strong> Dynamically selects the propagation model used in the simulation.</p>
+                            
+                            <div class="declaration">
+                                void setPropagationModel(int modelType);
+                            </div>
+                            
+                            <div class="code-container" id="code7">
+                                <pre>
+void setPropagationModel(int modelType) {
+    // Implementation would depend on the specific propagation models available
+    // This is a placeholder for the actual implementation
+    switch(modelType) {
+        case 0:
+            // Set to free space model
+            break;
+        case 1:
+            // Set to two-ray ground model
+            break;
+        case 2:
+            // Set to log-distance model
+            break;
+        default:
+            NS_LOG_ERROR("Invalid propagation model type: " &lt;&lt; modelType);
+    }
+}
+                                </pre>
+                            </div>
+                            
+                            <div class="example">
+                                <strong>Example:</strong>
+                                <pre>
+// Set propagation model to log-distance (assuming type 2)
+setPropagationModel(2);
+                                </pre>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary" onclick="toggleCode('code7')">
+                                <i class="fas fa-code"></i> View code
+                            </button>
+                            <button class="btn btn-secondary" onclick="copyCode('code7')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Function 8 -->
+                    <div class="function-card" data-category="config" data-complexity="simple" id="change-pt">
+                        <div class="card-header">
+                            <h3>changePT</h3>
+                            <p>Modifies the transmission power of a specific node</p>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Description:</strong> Modifies the transmission power of a specific node.</p>
+                            
+                            <div class="declaration">
+                                void changePT(int nodeIndex, double newPower);
+                            </div>
+                            
+                            <div class="code-container" id="code8">
+                                <pre>
+void changePT(int nodeIndex, double newPower) {
+    if (nodeIndex &lt; 0 || nodeIndex >= NodeList::GetNNodes()) {
+        NS_LOG_ERROR("Invalid node index: " &lt;&lt; nodeIndex);
+        return;
+    }
+    
+    Ptr&lt;Node&gt; node = NodeList::GetNode(nodeIndex);
+    Ptr&lt;LoraNetDevice&gt; netDevice = node-&gt;GetDevice(0)-&gt;GetObject&lt;LoraNetDevice&gt;();
+    
+    if (netDevice) {
+        Ptr&lt;LoraPhy&gt; phy = netDevice-&gt;GetPhy();
+        phy-&gt;SetTxPower(newPower);
+        NS_LOG_INFO("Transmission power set to " &lt;&lt; newPower &lt;&lt; " dBm for node " &lt;&lt; nodeIndex);
+    } else {
+        NS_LOG_ERROR("Unable to retrieve netDevice for node " &lt;&lt; nodeIndex);
+    }
+}
+                                </pre>
+                            </div>
+                            
+                            <div class="example">
+                                <strong>Example:</strong>
+                                <pre>
+// Set transmission power to 14 dBm for node 5
+changePT(5, 14.0);
+                                </pre>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary" onclick="toggleCode('code8')">
+                                <i class="fas fa-code"></i> View code
+                            </button>
+                            <button class="btn btn-secondary" onclick="copyCode('code8')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Function 9 -->
+                    <div class="function-card" data-category="config" data-complexity="simple" id="change-sf">
+                        <div class="card-header">
+                            <h3>changeSF</h3>
+                            <p>Updates the spreading factor assigned to a node</p>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Description:</strong> Updates the spreading factor assigned to a node.</p>
+                            
+                            <div class="declaration">
+                                void changeSF(int nodeIndex, int newSF);
+                            </div>
+                            
+                            <div class="code-container" id="code9">
+                                <pre>
+void changeSF(int nodeIndex, int newSF) {
+    if (nodeIndex &lt; 0 || nodeIndex >= NodeList::GetNNodes()) {
+        NS_LOG_ERROR("Invalid node index: " &lt;&lt; nodeIndex);
+        return;
+    }
+    
+    if (newSF &lt; 7 || newSF > 12) {
+        NS_LOG_ERROR("Invalid Spreading Factor: " &lt;&lt; newSF &lt;&lt; ". Must be between 7 and 12.");
+        return;
+    }
+    
+    Ptr&lt;Node&gt; node = NodeList::GetNode(nodeIndex);
+    Ptr&lt;LoraNetDevice&gt; netDevice = node-&gt;GetDevice(0)-&gt;GetObject&lt;LoraNetDevice&gt;();
+    
+    if (netDevice) {
+        Ptr&lt;EndDeviceLoraMac&gt; mac = netDevice-&gt;GetMac()-&gt;GetObject&lt;EndDeviceLoraMac&gt;();
+        if (mac) {
+            mac-&gt;SetSpreadingFactor(newSF);
+            NS_LOG_INFO("Spreading Factor set to " &lt;&lt; newSF &lt;&lt; " for node " &lt;&lt; nodeIndex);
+        } else {
+            NS_LOG_ERROR("Unable to retrieve MAC layer for node " &lt;&lt; nodeIndex);
+        }
+    } else {
+        NS_LOG_ERROR("Unable to retrieve netDevice for node " &lt;&lt; nodeIndex);
+    }
+}
+                                </pre>
+                            </div>
+                            
+                            <div class="example">
+                                <strong>Example:</strong>
+                                <pre>
+// Set spreading factor to 9 for node 3
+changeSF(3, 9);
+                                </pre>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary" onclick="toggleCode('code9')">
+                                <i class="fas fa-code"></i> View code
+                            </button>
+                            <button class="btn btn-secondary" onclick="copyCode('code9')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Function 10 -->
+                    <div class="function-card" data-category="stats" data-complexity="medium" id="energy-consumption">
+                        <div class="card-header">
+                            <h3>energyConsumption</h3>
+                            <p>Provides the energy profile of a selected node</p>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Description:</strong> Provides the energy profile of a selected node.</p>
+                            
+                            <div class="declaration">
+                                std::vector&lt;double&gt; energyConsumption(int nodeIndex);
+                            </div>
+                            
+                            <div class="code-container" id="code10">
+                                <pre>
+std::vector&lt;double&gt; energyConsumption(int nodeIndex) {
+    std::vector&lt;double&gt; energyStats(3, 0.0); // [total, transmission, reception]
+    
+    if (nodeIndex &lt; 0 || nodeIndex >= NodeList::GetNNodes()) {
+        NS_LOG_ERROR("Invalid node index: " &lt;&lt; nodeIndex);
+        return energyStats;
+    }
+    
+    Ptr&lt;Node&gt; node = NodeList::GetNode(nodeIndex);
+    Ptr&lt;EnergySource&gt; energySource = node-&gt;GetObject&lt;EnergySourceContainer&gt;()-&gt;Get(0);
+    
+    if (energySource) {
+        // Get total energy consumed
+        energyStats[0] = energySource-&gt;GetInitialEnergy() - energySource-&gt;GetRemainingEnergy();
+        
+        // Get energy consumed for transmission (this would need device-specific implementation)
+        Ptr&lt;LoraNetDevice&gt; netDevice = node-&gt;GetDevice(0)-&gt;GetObject&lt;LoraNetDevice&gt;();
+        if (netDevice) {
+            // Implementation would depend on how energy consumption is tracked
+            // This is a placeholder for the actual implementation
+        }
+    } else {
+        NS_LOG_ERROR("Unable to retrieve energy source for node " &lt;&lt; nodeIndex);
+    }
+    
+    return energyStats;
+}
+                                </pre>
+                            </div>
+                            
+                            <div class="example">
+                                <strong>Example:</strong>
+                                <pre>
+// Get energy consumption for node 2
+std::vector&lt;double&gt; energy = energyConsumption(2);
+std::cout &lt;&lt; "Total energy consumed: " &lt;&lt; energy[0] &lt;&lt; " J" &lt;&lt; std::endl;
+                                </pre>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary" onclick="toggleCode('code10')">
+                                <i class="fas fa-code"></i> View code
+                            </button>
+                            <button class="btn btn-secondary" onclick="copyCode('code10')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="pagination">
+                    <button class="active">1</button>
+                    <button>2</button>
+                    <button>3</button>
+                    <button>4</button>
+                    <button>5</button>
+                </div>
+
+                <button class="add-function-btn" onclick="toggleForm()">
+                    <i class="fas fa-plus-circle"></i> Add a new function
+                </button>
+
+                <div class="form-container" id="formulaire">
+                    <h2>Add a new function</h2>
+                    <form onsubmit="event.preventDefault(); addFunction();">
+                        <div class="form-group">
+                            <label for="nom">Function name</label>
+                            <input type="text" id="nom" placeholder="ex: MyFunction" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="description">Short description</label>
+                            <input type="text" id="description" placeholder="Function description" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="declaration">Declaration</label>
+                            <textarea id="declaration" placeholder="ex: int MyFunction(parameters)" required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="code">Complete code</label>
+                            <textarea id="code" placeholder="C++ function code"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="exemple">Usage example</label>
+                            <textarea id="exemple" placeholder="Code example"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="categorie">Category</label>
+                            <select id="categorie">
+                                <option value="config">Configuration</option>
+                                <option value="stats">Statistics</option>
+                                <option value="mac">MAC Layer</option>
+                                <option value="phy">Physical Layer</option>
+                                <option value="util">Utilities</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="complexite">Complexity</label>
+                            <select id="complexite">
+                                <option value="simple">Simple</option>
+                                <option value="medium">Medium</option>
+                                <option value="complex">Complex</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-cancel" onclick="toggleForm()">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Add function</button>
+                        </div>
+                    </form>
+                </div>
+            </main>
+        </div>
+
+        <footer>
+            <p>NS-3 LoRaWAN Documentation &copy; 2023 - All rights reserved</p>
+            <p>Last update: November 15, 2023</p>
+        </footer>
+    </div>
+
+    <script>
+        // Function to show/hide code
+        function toggleCode(id) {
+            const codeContainer = document.getElementById(id);
+            codeContainer.style.display = (codeContainer.style.display === "none" || codeContainer.style.display === "") ? "block" : "none";
+            
+            // Update button text
+            const buttons = document.querySelectorAll(`button[onclick="toggleCode('${id}')"]`);
+            buttons.forEach(button => {
+                const icon = button.querySelector('i');
+                if (codeContainer.style.display === "block") {
+                    icon.className = "fas fa-eye-slash";
+                } else {
+                    icon.className = "fas fa-code";
+                }
+            });
+        }
+
+        // Function to copy code
+        function copyCode(id) {
+            const codeContainer = document.getElementById(id);
+            const code = codeContainer.querySelector('pre').textContent;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                const buttons = document.querySelectorAll(`button[onclick="copyCode('${id}')"]`);
+                buttons.forEach(button => {
+                    const originalText = button.innerHTML;
+                    button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                    
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                    }, 2000);
+                });
+            });
+        }
+
+        // Function to show/hide form
+        function toggleForm() {
+            const form = document.getElementById("formulaire");
+            form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
+        }
+
+        // Function to scroll to a specific function
+        function scrollToFunction(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Function to add a new function
+        function addFunction() {
+            const nom = document.getElementById("nom").value;
+            const description = document.getElementById("description").value;
+            const declaration = document.getElementById("declaration").value;
+            const code = document.getElementById("code").value;
+            const exemple = document.getElementById("exemple").value;
+            const categorie = document.getElementById("categorie").value;
+            const complexite = document.getElementById("complexite").value;
+
+            if (!nom || !description || !declaration) {
+                alert("Please fill in at least the name, description and declaration of the function.");
+                return;
+            }
+
+            // Generate a unique ID for the code
+            const idUnique = "code" + Date.now();
+
+            // Create the new function card
+            const functionCard = document.createElement("div");
+            functionCard.className = "function-card";
+            functionCard.dataset.category = categorie;
+            functionCard.dataset.complexity = complexite;
+            
+            functionCard.innerHTML = `
+                <div class="card-header">
+                    <h3>${nom}</h3>
+                    <p>${description}</p>
+                </div>
+                <div class="card-body">
+                    <p><strong>Description:</strong> ${description}</p>
+                    
+                    <div class="declaration">
+                        ${declaration}
+                    </div>
+                    
+                    <div class="code-container" id="${idUnique}">
+                        <pre>${code || "// No code provided"}</pre>
+                    </div>
+                    
+                    <div class="example">
+                        <strong>Example:</strong>
+                        <pre>${exemple || "// No example provided"}</pre>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-primary" onclick="toggleCode('${idUnique}')">
+                        <i class="fas fa-code"></i> View code
+                    </button>
+                    <button class="btn btn-secondary" onclick="copyCode('${idUnique}')">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+            `;
+
+            // Add the new card to the grid
+            document.querySelector('.function-grid').appendChild(functionCard);
+            
+            // Update function counter
+            document.getElementById('functionCount').textContent = parseInt(document.getElementById('functionCount').textContent) + 1;
+            
+            // Reset and hide the form
+            document.getElementById("formulaire").reset();
+            toggleForm();
+            
+            alert("Function added successfully!");
+        }
+
+        // Initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add search functionality
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('keyup', function() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const functionCards = document.querySelectorAll('.function-card');
+                
+                functionCards.forEach(card => {
+                    const title = card.querySelector('h3').textContent.toLowerCase();
+                    const description = card.querySelector('.card-body p').textContent.toLowerCase();
+                    const declaration = card.querySelector('.declaration').textContent.toLowerCase();
+                    
+                    if (title.includes(searchTerm) || description.includes(searchTerm) || declaration.includes(searchTerm)) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Add filtering functionality
+            const categoryFilter = document.getElementById('categoryFilter');
+            const complexityFilter = document.getElementById('complexityFilter');
+            
+            function applyFilters() {
+                const categoryValue = categoryFilter.value;
+                const complexityValue = complexityFilter.value;
+                
+                const functionCards = document.querySelectorAll('.function-card');
+                
+                functionCards.forEach(card => {
+                    const cardCategory = card.dataset.category;
+                    const cardComplexity = card.dataset.complexity;
+                    
+                    const categoryMatch = categoryValue === 'all' || cardCategory === categoryValue;
+                    const complexityMatch = complexityValue === 'all' || cardComplexity === complexityValue;
+                    
+                    if (categoryMatch && complexityMatch) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+            
+            categoryFilter.addEventListener('change', applyFilters);
+            complexityFilter.addEventListener('change', applyFilters);
+        });
+    </script>
+</body>
+</html>

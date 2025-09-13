@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NC-LoraSim - Researcher Mode</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Leaflet CSS for map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <!-- Leaflet Search CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-search@2.9.0/dist/leaflet-search.min.css" />
+    
+    <!-- CodeMirror for code editor -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/dialog/dialog.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/foldgutter.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/search/matchesonscrollbar.min.css">
+
+    <style>
+        /* Unchanged styles (preserved from original code) */
+        :root {
+            --primary: #2c5aa0;
+            --primary-light: #3a6bc0;
+            --primary-dark: #1e3f73;
+            --secondary: #6c757d;
+            --success: #28a745;
+            --info: #17a2b8;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-800: #343a40;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            font-family: 'Roboto', sans-serif;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+
+        /* Enhanced navigation */
+        .navbar-custom {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 0.8rem 1rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white !important;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand i {
+            margin-right: 10px;
+            font-size: 1.8rem;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            border-radius: 4px;
+            transition: var(--transition);
+            margin: 0 2px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: white !important;
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .nav-link.active {
+            font-weight: 600;
+        }
+
+        .user-menu {
+            color: white;
+            position: relative;
+        }
+
+        .user-menu-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .user-menu-btn:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .user-menu-btn i {
+            margin-left: 8px;
+            transition: var(--transition);
+        }
+
+        .user-menu.show .user-menu-btn i {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: var(--box-shadow);
+            border-radius: var(--border-radius);
+            padding: 0.5rem 0;
+            margin-top: 10px !important;
+        }
+
+        .dropdown-item {
+            padding: 0.5rem 1.5rem;
+            transition: var(--transition);
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--gray-100);
+        }
+
+        .dropdown-item.logout {
+            color: var(--danger);
+        }
+
+        .dropdown-item.logout:hover {
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+
+        /* Main content */
+        .main-container {
+            padding: 2rem 0;
+        }
+
+        .page-title {
+            color: var(--primary-dark);
+            font-weight: 700;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--primary-light);
+            position: relative;
+        }
+
+        .page-title:after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 80px;
+            height: 2px;
+            background-color: var(--success);
+        }
+
+        /* Enhanced cards */
+        .card {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 1.5rem;
+            transition: var(--transition);
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            color: white;
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Enhanced forms */
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .form-control, .form-select {
+            border: 1px solid var(--gray-300);
+            border-radius: var(--border-radius);
+            padding: 0.75rem 1rem;
+            transition: var(--transition);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(44, 90, 160, 0.25);
+        }
+
+        /* Enhanced map */
+        #map-container {
+            margin-bottom: 1.5rem;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            width: 100%;
+            height: 500px;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-controls {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .radius-info {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            z-index: 1000;
+            background: white;
+            padding: 8px 12px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .search-container {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 1000;
+            width: 280px;
+        }
+
+        /* Advanced configuration */
+        .advanced-config {
+            background: linear-gradient(145deg, #2b2b3b, #21212e);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-top: 1rem;
+            color: white;
+        }
+
+        .editor-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .help-icon {
+            width: 22px;
+            filter: invert(70%);
+            transition: var(--transition);
+            margin-left: 10px;
+        }
+
+        .help-icon:hover {
+            transform: scale(1.3);
+            filter: invert(40%);
+        }
+
+        /* Enhanced code editor */
+        .code-editor-container {
+            position: relative;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin-bottom: 1rem;
+            resize: vertical;
+            min-height: 250px;
+            max-height: 600px;
+            height: 400px;
+            border: 1px solid #444;
+        }
+
+        .CodeMirror {
+            height: 100%;
+            font-family: 'Fira Code', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .editor-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #2d2d3d;
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid #444;
+        }
+
+        .editor-actions button {
+            background: transparent;
+            border: none;
+            color: #aaa;
+            padding: 0.25rem 0.5rem;
+            margin-left: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border-radius: 3px;
+        }
+
+        .editor-actions button:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .editor-info {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        /* Terminal styles */
+        .terminal-output {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Courier New', monospace;
+            padding: 1rem;
+            height: 250px;
+            overflow-y: auto;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+        }
+        
+        .terminal-line {
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+            white-space: pre-wrap;
+        }
+        
+        .terminal-command {
+            color: #569cd6;
+        }
+        
+        .terminal-error {
+            color: #f44747;
+        }
+        
+        .terminal-success {
+            color: #6a9955;
+        }
+        
+        .terminal-warning {
+            color: #d7ba7d;
+        }
+        
+        /* Custom scrollbar for terminal */
+        .terminal-output::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .terminal-output::-webkit-scrollbar-track {
+            background: #2d2d2d;
+        }
+        
+        .terminal-output::-webkit-scrollbar-thumb {
+            background: #5a5a5a;
+            border-radius: 4px;
+        }
+        
+        .terminal-output::-webkit-scrollbar-thumb:hover {
+            background: #707070;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+            
+            .nav-link {
+                padding: 0.5rem !important;
+                font-size: 0.9rem;
+            }
+            
+            .page-title {
+                font-size: 1.5rem;
+            }
+            
+            #map-container {
+                height: 350px;
+            }
+            
+            .search-container {
+                width: calc(100% - 30px);
+            }
+            
+            .map-controls {
+                flex-direction: row;
+                bottom: 15px;
+                top: auto;
+                right: 15px;
+            }
+            
+            .code-editor-container {
+                height: 300px;
+            }
+        }
+
+
+
+
+
+
+
+
+        .help-link {
+    text-decoration: none;
+    color: #007bff; /* bleu comme un lien */
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+
+.help-link:hover {
+    background-color: #e0e0e0;
+}
+
+    </style>
+</head>
+<body>
+    <!-- Enhanced navigation bar -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-satellite"></i>NC-LoraSim
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" 
+                    aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/choix.html">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/connexion.html">
+                            <i class="fas fa-sign-in-alt me-1"></i>Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/simulation-manager.html">
+                            <i class="fas fa-cogs me-1"></i>Automatic Mode
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/NS3-LoRaWan.html">
+                            <i class="fas fa-sliders-h me-1"></i>Manual Mode
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/chercher.html">
+                            <i class="fas fa-chart-line me-1"></i>Researcher Mode
+                        </a>
+                    </li>
+                </ul>
+                
+                <div class="user-menu">
+                    <button class="user-menu-btn">
+                        <i class="fas fa-user-circle me-2"></i>My Account
+                        <i class="fas fa-chevron-down ms-1"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item logout" href="#">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+  
+    <div class="container main-container">
+        <h1 class="page-title text-center">NC-LoraSim : Researcher Mode</h1>
+
+        <!-- Map for selecting simulation area -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-map-marked-alt me-2"></i>Simulation Area Selection
+            </div>
+            <div class="card-body p-0">
+                <div id="map-container">
+                    <div id="map"></div>
+                    <div class="search-container">
+                        <div class="input-group">
+                            <input type="text" id="addressSearch" class="form-control" placeholder="Search for a city, village...">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="button" id="searchButton">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="map-controls">
+                        <button id="drawCircleBtn" class="btn btn-primary btn-sm">
+                            <i class="fas fa-draw-circle me-1"></i>Area
+                        </button>
+                        <button id="view3dBtn" class="btn btn-info btn-sm" disabled>
+                            <i class="fas fa-cube me-1"></i>3D
+                        </button>
+                        <button id="clearCircleBtn" class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash me-1"></i>Clear
+                        </button>
+                    </div>
+                    <div class="radius-info">
+                        <i class="fas fa-ruler-combined me-1"></i>Radius: <span id="radiusValue">0</span> meters
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced code -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-code me-2"></i>Advanced Code Editor
+            </div>
+            <div class="card-body">
+                <div id="customFunctionsConfig" class="advanced-config">
+                    <div class="editor-header" style="display: flex; align-items: center; justify-content: space-between;">
+                        <label for="customFunctions" class="fw-semibold mb-0">Write your code:</label>
+                        <a href="fonction-aide.html" target="_blank" title="Click to see available functions"
+                           style="text-decoration: none; color: #0d6efd; font-weight: 600; margin-right: 20px;">
+                            Help
+                        </a>
+                    </div>
+                    
+                    
+                        
+                    <div class="code-editor-container">
+                        <div class="editor-toolbar">
+                            <div class="editor-info">C++</div>
+                            <div class="editor-actions">
+                                <button id="formatCodeBtn" title="Format code">
+                                    <i class="fas fa-indent"></i>
+                                </button>
+                                <button id="foldCodeBtn" title="Fold/Unfold code">
+                                    <i class="fas fa-compress-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <textarea id="customFunctions" style="display: none;">// Network parameters
+int nDevices = 10;    // Number of Nodes
+int nGateways = 5;     // Number of gateways
+double simulationTime = 120;
+int appPeriod = 12;  // Sending period
+int payload = 50;
+
+bool addBuildings = true;
+bool confirmedup = true;
+
+int main () {
+    // Your simulation code here
+      
+int indexNode = 3;  
+std::vector<double> pos = GetNodeCoordinates(endDevices, indexNode);
+
+std::cout << "Node coordinates " << indexNode << " : x="<< pos[0] << " y= " << pos[1] << " z= " << pos[2] << " " << std::endl;
+    
+    return 0;
+}</textarea>
+                    </div>
+                    
+                    <small class="form-text text-light mt-2">
+                        You can use loops <code>for</code>, <code>while</code>, conditions <code>if</code>, functions like <code>sqrt()</code> etc.<br>
+                        Use <code>{}</code> for blocks and <code>;</code> to separate instructions.
+                    </small>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button id="runCodeBtn" class="btn btn-primary btn-lg">
+                        <i class="fas fa-play me-2"></i>Test Code
+                    </button>
+                    <button id="sendToServerBtn" class="btn btn-success btn-lg ml-2">
+                        <i class="fas fa-paper-plane me-2"></i>Execute Code
+                    </button>
+                    <button id="downloadCodeBtn" class="btn-info btn-lg ml-2">
+                        <i class="fas fa-download me-2"></i>Download Code
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terminal to display results -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-terminal me-2"></i>Output Terminal
+                </div>
+                <button class="btn btn-sm btn-outline-secondary" onclick="clearTerminal()">
+                    <i class="fas fa-trash-alt me-1"></i>Clear
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <div id="terminal" class="terminal-output">
+                    <div class="terminal-line"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <!-- Leaflet JS for map -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <!-- Leaflet Search JS -->
+    <script src="https://unpkg.com/leaflet-search@2.9.0/dist/leaflet-search.min.js"></script>
+    
+    <!-- CodeMirror for code editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/comment/comment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/foldcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/foldgutter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/brace-fold.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/fold/comment-fold.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/selection/active-line.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/search/search.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/search/searchcursor.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/dialog/dialog.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/addon/format/formatting.min.js"></script>
+
+    <script>
+        document.getElementById('downloadCodeBtn').addEventListener('click', () => {
+    const code = document.getElementById('customFunctions').value; // get the code
+    const blob = new Blob([code], { type: 'text/plain' }); // create a text file
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'simulation.cc'; // file name
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+});
+
+        // Map initialization
+        let map, drawnCircle, centerMarker;
+        let isDrawingMode = false;
+        
+        function initMap() {
+            // Initialize map centered on Paris by default
+            map = L.map('map').setView([48.8566, 2.3522], 13);
+            
+            // Add OpenStreetMap layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Add search
+            const searchControl = new L.Control.Search({
+                position: 'topleft',
+                layer: L.layerGroup(),
+                initial: false,
+                zoom: 14,
+                marker: false,
+                textPlaceholder: 'Search for a city...'
+            });
+            
+            searchControl.on('search:locationfound', function(e) {
+                if (drawnCircle) {
+                    map.removeLayer(drawnCircle);
+                }
+                if (centerMarker) {
+                    map.removeLayer(centerMarker);
+                }
+                
+                // Center map on result
+                map.setView(e.latlng, 14);
+                
+                // Create a circle around the found position
+                drawnCircle = L.circle(e.latlng, {
+                    color: '#3388ff',
+                    weight: 2,
+                    fillColor: '#3388ff',
+                    fillOpacity: 0.2,
+                    radius: 1000
+                }).addTo(map);
+                
+                // Add a marker at the center
+                centerMarker = L.marker(e.latlng).addTo(map)
+                    .bindPopup('Simulation center').openPopup();
+                
+                // Update information
+                document.getElementById('radiusValue').textContent = '1000';
+                
+                // Enable 3D visualization button
+                document.getElementById('view3dBtn').disabled = false;
+            });
+            
+            map.addControl(searchControl);
+            
+            // Enable search from custom search bar
+            document.getElementById('searchButton').addEventListener('click', function() {
+                const query = document.getElementById('addressSearch').value;
+                if (query.length > 2) {
+                    // Use Nominatim for geocoding
+                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data && data.length > 0) {
+                                const result = data[0];
+                                const latlng = L.latLng(parseFloat(result.lat), parseFloat(result.lon));
+                                
+                                if (drawnCircle) {
+                                    map.removeLayer(drawnCircle);
+                                }
+                                if (centerMarker) {
+                                    map.removeLayer(centerMarker);
+                                }
+                                
+                                // Center map on result
+                                map.setView(latlng, 14);
+                                
+                                // Create a circle around the found position
+                                drawnCircle = L.circle(latlng, {
+                                    color: '#3388ff',
+                                    weight: 2,
+                                    fillColor: '#3388ff',
+                                    fillOpacity: 0.2,
+                                    radius: 1000
+                                }).addTo(map);
+                                
+                                // Add a marker at the center
+                                centerMarker = L.marker(latlng).addTo(map)
+                                    .bindPopup('Simulation center').openPopup();
+                                
+                                // Update information
+                                document.getElementById('radiusValue').textContent = '1000';
+                                
+                                // Enable 3D visualization button
+                                document.getElementById('view3dBtn').disabled = false;
+                            }
+                        });
+                }
+            });
+            
+            // Enable circle drawing
+            document.getElementById('drawCircleBtn').addEventListener('click', function() {
+                if (isDrawingMode) {
+                    disableDrawingMode();
+                    return;
+                }
+                
+                enableDrawingMode();
+                alert('Click on the map to set the circle center, then move the mouse to adjust the radius and click again to validate.');
+            });
+            
+            // Clear circle
+            document.getElementById('clearCircleBtn').addEventListener('click', function() {
+                if (drawnCircle) {
+                    map.removeLayer(drawnCircle);
+                    drawnCircle = null;
+                }
+                if (centerMarker) {
+                    map.removeLayer(centerMarker);
+                    centerMarker = null;
+                }
+                document.getElementById('radiusValue').textContent = '0';
+                document.getElementById('view3dBtn').disabled = true;
+                
+                disableDrawingMode();
+            });
+            
+            // Functions to manage drawing mode
+            function enableDrawingMode() {
+                isDrawingMode = true;
+                document.getElementById('drawCircleBtn').classList.add('active');
+                map.dragging.disable();
+                map.on('click', handleMapClick);
+            }
+            
+            function disableDrawingMode() {
+                isDrawingMode = false;
+                document.getElementById('drawCircleBtn').classList.remove('active');
+                map.dragging.enable();
+                map.off('click', handleMapClick);
+                map.off('mousemove', updateCircleRadius);
+            }
+            
+            function handleMapClick(e) {
+                if (!centerMarker) {
+                    // First click: set center
+                    centerMarker = L.marker(e.latlng).addTo(map)
+                        .bindPopup('Simulation center').openPopup();
+                    
+                    // Create initial circle
+                    drawnCircle = L.circle(e.latlng, {
+                        color: '#3388ff',
+                        weight: 2,
+                        fillColor: '#3388ff',
+                        fillOpacity: 0.2,
+                        radius: 1000
+                    }).addTo(map);
+                    
+                    document.getElementById('radiusValue').textContent = '1000';
+                    
+                    // Enable mouse tracking to adjust radius
+                    map.on('mousemove', updateCircleRadius);
+                } else {
+                    // Second click: finish drawing
+                    disableDrawingMode();
+                    document.getElementById('view3dBtn').disabled = false;
+                    alert('Circle defined. Click on "Area" to create a new one.');
+                }
+            }
+            
+            function updateCircleRadius(e) {
+                if (centerMarker && drawnCircle) {
+                    const center = centerMarker.getLatLng();
+                    const radius = center.distanceTo(e.latlng);
+                    drawnCircle.setRadius(radius);
+                    document.getElementById('radiusValue').textContent = Math.round(radius);
+                }
+            }
+        }
+        
+        // Code editor initialization
+        let codeEditor;
+        
+        function initCodeEditor() {
+            // CodeMirror configuration
+            codeEditor = CodeMirror.fromTextArea(document.getElementById('customFunctions'), {
+                mode: 'text/x-c++src',
+                theme: 'dracula',
+                lineNumbers: true,
+                indentUnit: 4,
+                smartIndent: true,
+                tabSize: 4,
+                indentWithTabs: false,
+                electricChars: true,
+                autoCloseBrackets: true,
+                matchBrackets: true,
+                autoCloseTags: true,
+                foldGutter: true,
+                gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
+                styleActiveLine: true,
+                lineWrapping: true,
+                extraKeys: {
+                    'Ctrl-/': 'toggleComment',
+                    'Cmd-/': 'toggleComment',
+                    'Ctrl-F': 'findPersistent',
+                    'Cmd-F': 'findPersistent',
+                    'Tab': 'indentMore',
+                    'Shift-Tab': 'indentLess',
+                    'Ctrl-D': 'selectNextOccurrence',
+                    'Cmd-D': 'selectNextOccurrence'
+                }
+            });
+            
+            // Adjust editor size when container is resized
+            const container = document.querySelector('.code-editor-container');
+            const observer = new ResizeObserver(entries => {
+                codeEditor.refresh();
+            });
+            observer.observe(container);
+            
+            // Format code
+            document.getElementById('formatCodeBtn').addEventListener('click', function() {
+                const totalLines = codeEditor.lineCount();
+                codeEditor.autoFormatRange({line:0, ch:0}, {line: totalLines});
+            });
+            
+            // Fold/Unfold code
+            document.getElementById('foldCodeBtn').addEventListener('click', function() {
+                codeEditor.execCommand('foldAll');
+            });
+            
+            // Set initial size
+            codeEditor.setSize('100%', '100%');
+            codeEditor.refresh();
+        }
+        
+        // Terminal functions
+        const terminal = document.getElementById('terminal');
+        
+        function printToTerminal(message, type = 'normal') {
+            if (!terminal) return;
+
+            // Extract only the part after '---'
+            const index = message.indexOf('---');
+            if (index !== -1) {
+                message = message.slice(index + 3); // +3 to skip the '---'
+            }
+
+            // Separate message by commas
+            const parts = message.split(',');
+
+            parts.forEach(part => {
+                const lineDiv = document.createElement('div');
+                lineDiv.className = 'terminal-line';
+
+                switch(type) {
+                    case 'command':
+                        lineDiv.classList.add('terminal-command');
+                        break;
+                    case 'error':
+                        lineDiv.classList.add('terminal-error');
+                        break;
+                    case 'success':
+                        lineDiv.classList.add('terminal-success');
+                        break;
+                    case 'warning':
+                        lineDiv.classList.add('terminal-warning');
+                        break;
+                }
+
+                // Remove quotes, brackets and spaces
+                lineDiv.textContent = part.replace(/["\[\]]/g, '').trim();
+
+                // Only add the line if it's not empty
+                if (lineDiv.textContent) {
+                    terminal.appendChild(lineDiv);
+                }
+            });
+
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function clearTerminal() {
+            if (terminal) {
+                terminal.innerHTML = '<div class="terminal-line"></div>';
+            }
+        }
+        
+        // Function to extract parameters from C++ code
+        function extractParameters(code) {
+            const params = {
+                nDevices: 10,       // Default value
+                nGateways: 5,       // Default value
+                simulationTime: 120, // Default value
+                appPeriod: 12,      // Default value
+                payload: 50,        // Default value
+                batiments: true     // Default value
+            };
+            
+            // Extract nDevices
+            const nDevicesMatch = code.match(/int nDevices\s*=\s*(\d+)/);
+            if (nDevicesMatch && nDevicesMatch[1]) {
+                params.nDevices = parseInt(nDevicesMatch[1]);
+            }
+            
+            // Extract nGateways
+            const nGatewaysMatch = code.match(/int nGateways\s*=\s*(\d+)/);
+            if (nGatewaysMatch && nGatewaysMatch[1]) {
+                params.nGateways = parseInt(nGatewaysMatch[1]);
+            }
+            
+            // Extract simulationTime
+            const simulationTimeMatch = code.match(/double simulationTime\s*=\s*(\d+(\.\d+)?)/);
+            if (simulationTimeMatch && simulationTimeMatch[1]) {
+                params.simulationTime = parseFloat(simulationTimeMatch[1]);
+            }
+            
+            // Extract appPeriod
+            const appPeriodMatch = code.match(/int appPeriod\s*=\s*(\d+)/);
+            if (appPeriodMatch && appPeriodMatch[1]) {
+                params.appPeriod = parseInt(appPeriodMatch[1]);
+            }
+            
+            // Extract payload
+            const payloadMatch = code.match(/int payload\s*=\s*(\d+)/);
+            if (payloadMatch && payloadMatch[1]) {
+                params.payload = parseInt(payloadMatch[1]);
+            }
+            
+            // Extract addBuildings
+            const buildingsMatch = code.match(/bool addBuildings\s*=\s*(true|false)/);
+            if (buildingsMatch && buildingsMatch[1]) {
+                params.batiments = buildingsMatch[1] === 'true';
+            }
+            
+            return params;
+        }
+        
+        function extractMainCode(code) {
+            // Regular expression to capture main() content
+            const mainRegex = /int\s+main\s*\(\s*\)\s*\{([\s\S]*?)\s*return\s+0\s*;\s*\}/;
+            const match = code.match(mainRegex);
+
+            let mainContent = '';
+
+            if (match && match[1]) {
+                mainContent = match[1];
+            } else {
+                // Alternative method if regex doesn't work
+                const mainStart = code.indexOf('int main()');
+                if (mainStart === -1) return '';
+
+                let openBracePos = code.indexOf('{', mainStart);
+                if (openBracePos === -1) return '';
+
+                let depth = 1;
+                let currentPos = openBracePos + 1;
+
+                while (depth > 0 && currentPos < code.length) {
+                    if (code[currentPos] === '{') depth++;
+                    else if (code[currentPos] === '}') depth--;
+                    currentPos++;
+                }
+
+                if (depth !== 0) return '';
+
+                mainContent = code.substring(openBracePos + 1, currentPos - 1);
+
+                // Remove return 0; if present
+                const returnPos = mainContent.lastIndexOf('return 0;');
+                if (returnPos !== -1) {
+                    mainContent = mainContent.substring(0, returnPos);
+                }
+            }
+
+            // Split into lines, remove empty lines and add |||
+            const cleaned = mainContent
+                .split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0)
+                .join(' ||| ');
+
+            // Conversion to hexadecimal
+            let hex = '';
+            for (let i = 0; i < cleaned.length; i++) {
+                hex += cleaned.charCodeAt(i).toString(16).padStart(2, '0');
+            }
+
+            return hex;
+        }
+
+        // Code execution
+        document.getElementById('runCodeBtn').addEventListener('click', function() {
+            const code = codeEditor.getValue();
+            
+            if (!code.trim()) {
+                printToTerminal('Error: No code to execute.', 'error');
+                return;
+            }
+            
+            // Simulation of code execution
+            setTimeout(() => {
+                
+                // Extract parameters
+                const params = extractParameters(code);
+                
+                // Extract main function code
+                const mainCode = extractMainCode(code);
+                if (mainCode) {
+                    printToTerminal('Main code successfully extracted.', 'success');
+                } else {
+                    printToTerminal('Warning: Unable to extract main function code.', 'warning');
+                }
+                
+               
+                
+            }, 1000);
+        });
+        
+        // Send parameters to server
+        document.getElementById('sendToServerBtn').addEventListener('click', function() {
+            const code = codeEditor.getValue();
+            
+            if (!code.trim()) {
+                printToTerminal('Error: No code to execute.', 'error');
+                return;
+            }
+            
+            
+            // Extract parameters from code
+            const params = extractParameters(code);
+            
+            // Extract main function code
+            const mainCode = extractMainCode(code);
+            
+            if (!mainCode) {
+                printToTerminal('Error: Unable to extract main function code.', 'error');
+                printToTerminal('Make sure your code contains a main() function with return 0;', 'error');
+                return;
+            }
+            
+            // Encode main code for URL
+            const encodedMainCode = encodeURIComponent(mainCode);
+            
+            // Build URL with parameters and main code
+            const url = `/advanced-execute-chercher?appPeriod=${params.appPeriod}&payload=${params.payload}&nGateways=${params.nGateways}&nDevices=${params.nDevices}&Batiments=${params.batiments}&simulationTime=${params.simulationTime}&mainCode=${encodedMainCode}`;
+            
+            
+            // Send request to server
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP Error: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    printToTerminal('Server response:', 'success');
+                    printToTerminal(data, 'normal');
+                })
+                .catch(error => {
+                    printToTerminal('Error sending to server: ' + error.message, 'error');
+                });
+        });
+        
+        // Initialize map and editor when document is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+            initCodeEditor();
+        });
+    </script>
+</body>
+</html>

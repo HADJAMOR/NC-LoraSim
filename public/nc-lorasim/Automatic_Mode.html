@@ -1,0 +1,1794 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <!-- Leaflet CSS pour la carte -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<!-- Leaflet Search CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-search@2.9.0/dist/leaflet-search.min.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NC-LoraSim - Mode automatique</title>
+
+  <!-- Styles et scripts communs -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+
+  <style>
+
+
+/* Carte améliorée */
+#map-container {
+    margin-bottom: 1.5rem;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--box-shadow);
+    width: 100%;
+    height: 500px;
+    position: relative;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+}
+
+.map-controls {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 1000;
+    background: white;
+    padding: 10px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.radius-info {
+    position: absolute;
+    bottom: 15px;
+    left: 15px;
+    z-index: 1000;
+    background: white;
+    padding: 8px 12px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.search-container {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 1000;
+    width: 280px;
+}
+
+/* Responsive pour la carte */
+@media (max-width: 768px) {
+    #map-container {
+        height: 350px;
+    }
+    
+    .search-container {
+        width: calc(100% - 30px);
+    }
+    
+    .map-controls {
+        flex-direction: row;
+        bottom: 15px;
+        top: auto;
+        right: 15px;
+    }
+}
+    :root {
+      --primary: #2c5aa0;
+      --primary-light: #3a6bc0;
+      --primary-dark: #1e3f73;
+      --secondary: #6c757d;
+      --success: #28a745;
+      --info: #17a2b8;
+      --warning: #ffc107;
+      --danger: #dc3545;
+      --light: #f8f9fa;
+      --dark: #343a40;
+      --gray-100: #f8f9fa;
+      --gray-200: #e9ecef;
+      --gray-300: #dee2e6;
+      --gray-800: #343a40;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      --transition: all 0.3s ease;
+    }
+
+    body {
+      background-color: #f5f7fa;
+      font-family: 'Roboto', sans-serif;
+      color: #2d3748;
+      line-height: 1.6;
+    }
+
+    /* Navigation améliorée */
+    .navbar-custom {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      padding: 0.8rem 1rem;
+    }
+
+    .navbar-brand {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: white !important;
+      display: flex;
+      align-items: center;
+    }
+
+    .navbar-brand i {
+      margin-right: 10px;
+      font-size: 1.8rem;
+    }
+
+    .nav-link {
+      color: rgba(255, 255, 255, 0.85) !important;
+      font-weight: 500;
+      padding: 0.5rem 1rem !important;
+      border-radius: 4px;
+      transition: var(--transition);
+      margin: 0 2px;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: white !important;
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .nav-link.active {
+      font-weight: 600;
+    }
+
+    .user-menu {
+      color: white;
+      position: relative;
+    }
+
+    .user-menu-btn {
+      background: transparent;
+      border: none;
+      color: white;
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 0.8rem;
+      border-radius: 4px;
+      transition: var(--transition);
+    }
+
+    .user-menu-btn:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .user-menu-btn i {
+      margin-left: 8px;
+      transition: var(--transition);
+    }
+
+    .user-menu.show .user-menu-btn i {
+      transform: rotate(180deg);
+    }
+
+    .dropdown-menu {
+      border: none;
+      box-shadow: var(--box-shadow);
+      border-radius: var(--border-radius);
+      padding: 0.5rem 0;
+      margin-top: 10px !important;
+    }
+
+    .dropdown-item {
+      padding: 0.5rem 1.5rem;
+      transition: var(--transition);
+    }
+
+    .dropdown-item:hover {
+      background-color: var(--gray-100);
+    }
+
+    .dropdown-item.logout {
+      color: var(--danger);
+    }
+
+    .dropdown-item.logout:hover {
+      background-color: rgba(220, 53, 69, 0.1);
+    }
+
+    /* Contenu principal */
+    .main-container {
+      padding: 2rem 0;
+    }
+
+    .page-title {
+      color: var(--primary-dark);
+      font-weight: 700;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--primary-light);
+      position: relative;
+    }
+
+    .page-title:after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 80px;
+      height: 2px;
+      background-color: var(--success);
+    }
+
+    /* Cartes améliorées */
+    .card {
+      border: none;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      margin-bottom: 1.5rem;
+      transition: var(--transition);
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+      background: linear-gradient(to right, var(--primary), var(--primary-light));
+      color: white;
+      font-weight: 600;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    /* Formulaires améliorés */
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .form-label {
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: var(--dark);
+    }
+
+    .form-control, .form-select {
+      border: 1px solid var(--gray-300);
+      border-radius: var(--border-radius);
+      padding: 0.75rem 1rem;
+      transition: var(--transition);
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 0.2rem rgba(44, 90, 160, 0.25);
+    }
+
+    .form-check-input {
+      width: 1.2em;
+      height: 1.2em;
+      margin-top: 0.15em;
+    }
+
+    .form-check-input:checked {
+      background-color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .form-check-label {
+      margin-left: 0.5rem;
+      font-weight: 500;
+    }
+
+    /* Boutons améliorés */
+    .btn {
+      border-radius: var(--border-radius);
+      padding: 0.75rem 1.5rem;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .btn-primary {
+      background: linear-gradient(to right, var(--primary), var(--primary-light));
+      border: none;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(to right, var(--primary-dark), var(--primary));
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(44, 90, 160, 0.3);
+    }
+
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+
+    /* Tableaux améliorés */
+    .table {
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: 0 0 0 1px var(--gray-300);
+    }
+
+    .table th {
+      background-color: var(--primary);
+      color: white;
+      font-weight: 500;
+      border: none;
+      padding: 1rem;
+    }
+
+    .table td {
+      padding: 1rem;
+      vertical-align: middle;
+      border-color: var(--gray-200);
+    }
+
+    .table tr:nth-child(even) {
+      background-color: var(--gray-100);
+    }
+
+    .table tr:hover {
+      background-color: rgba(44, 90, 160, 0.05);
+    }
+
+    .table-responsive {
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+
+    /* Graphiques */
+    .chart-container {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--box-shadow);
+    }
+
+    .chart-title {
+      color: var(--primary-dark);
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--gray-300);
+    }
+
+    /* Navigation des graphiques */
+    .graph-nav {
+      display: flex;
+      justify-content: center;
+      margin: 1.5rem 0;
+      gap: 1rem;
+    }
+
+    .graph-nav-btn {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--primary);
+      color: white;
+      border: none;
+      transition: var(--transition);
+      box-shadow: var(--box-shadow);
+    }
+
+    .graph-nav-btn:hover {
+      background: var(--primary-dark);
+      transform: scale(1.1);
+    }
+
+    /* Badges */
+    .badge {
+      padding: 0.5rem 0.8rem;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    /* Indicateurs de statut */
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .status-success {
+      background-color: var(--success);
+    }
+
+    .status-warning {
+      background-color: var(--warning);
+    }
+
+    .status-danger {
+      background-color: var(--danger);
+    }
+
+    /* Carousel personnalisé */
+    .carousel {
+      margin-top: 20px;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .carousel-item {
+      padding: 20px;
+      background: white;
+      min-height: 400px;
+    }
+
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+      background-color: var(--primary);
+      border-radius: 50%;
+      padding: 15px;
+      background-size: 50% 50%;
+    }
+
+    /* Boutons d'action */
+    .btn-submit {
+      background: linear-gradient(to right, var(--primary), var(--primary-light));
+      color: white;
+      font-weight: 500;
+      padding: 12px 25px;
+      border-radius: var(--border-radius);
+      border: none;
+      transition: all 0.3s;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      font-size: 15px;
+    }
+
+    .btn-submit:hover {
+      background: linear-gradient(to right, var(--primary-dark), var(--primary));
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .navbar-brand {
+        font-size: 1.2rem;
+      }
+      
+      .nav-link {
+        padding: 0.5rem !important;
+        font-size: 0.9rem;
+      }
+      
+      .page-title {
+        font-size: 1.5rem;
+      }
+    }
+
+    /* Custom select vertical alignment */
+    .custom-select-vertical {
+      height: 38px;
+      display: flex;
+      align-items: center;
+      padding-top: 0;
+      padding-bottom: 0;
+      text-align-last: left;
+    }
+
+    /* Boutons d'action secondaires */
+    .btn-action-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .btn-action {
+      border-radius: var(--border-radius);
+      padding: 10px 20px;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    /* Animation pour les entrées */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-row > div {
+      animation: fadeIn 0.5s ease-out forwards;
+      animation-delay: calc(var(--order) * 0.1s);
+      opacity: 0;
+    }
+
+    /* Style pour les tooltips */
+    [data-toggle="tooltip"] {
+      border-bottom: 1px dashed #999;
+      cursor: help;
+    }
+  </style>
+</head>
+<body>
+  <!-- Barre de navigation améliorée -->
+  <nav class="navbar navbar-expand-lg navbar-custom">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <i class="fas fa-satellite"></i>NC-LoraSim
+      </a>
+      
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" 
+              aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/choix.html">
+              <i class="fas fa-home me-1"></i>Accueil
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/connexion.html">
+              <i class="fas fa-sign-in-alt me-1"></i>Connexion
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="/simulation-manager.html">
+              <i class="fas fa-cogs me-1"></i>Mode automatique
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/NS3-LoRaWan.html">
+              <i class="fas fa-sliders-h me-1"></i>Mode manuel
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/chercher.html">
+                <i class="fas fa-sliders-h me-1"></i>Mode chercheur
+            </a>
+        </li>
+        </ul>
+        
+        <div class="user-menu">
+          <button class="user-menu-btn">
+            <i class="fas fa-user-circle me-2"></i>Mon compte
+            <i class="fas fa-chevron-down ms-1"></i>
+          </button>
+          <div class="dropdown-menu">
+            <a class="dropdown-item logout" href="/connexion.html">
+              <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container main-container">
+    <h1 class="page-title text-center">NC-LoraSim : Mode Automatique</h1>
+<!-- Carte pour sélectionner la zone de simulation -->
+<div class="card">
+  <div class="card-header">
+      <i class="fas fa-map-marked-alt me-2"></i>Sélection de la zone de simulation
+  </div>
+  <div class="card-body p-0">
+      <div id="map-container">
+          <div id="map"></div>
+          <div class="search-container">
+              <div class="input-group">
+                  <input type="text" id="addressSearch" class="form-control" placeholder="Rechercher une ville, un village...">
+                  <div class="input-group-append">
+                      <button class="btn btn-primary" type="button">
+                          <i class="fas fa-search"></i>
+                      </button>
+                  </div>
+              </div>
+          </div>
+          <div class="map-controls">
+              <button id="drawCircleBtn" class="btn btn-primary btn-sm">
+                  <i class="fas fa-draw-circle me-1"></i>Zone
+              </button>
+              <button id="view3dBtn" class="btn btn-info btn-sm" disabled>
+                  <i class="fas fa-cube me-1"></i>3D
+              </button>
+              <button id="clearCircleBtn" class="btn btn-danger btn-sm">
+                  <i class="fas fa-trash me-1"></i>Effacer
+              </button>
+          </div>
+          <div class="radius-info">
+              <i class="fas fa-ruler-combined me-1"></i>Rayon: <span id="radiusValue">0</span> mètres
+          </div>
+      </div>
+  </div>
+</div>
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-cogs me-2"></i>Paramètres de simulation
+      </div>
+      <div class="card-body">
+        <form id="form">
+          <div class="form-row">
+            <div class="form-group col-md-4" style="--order: 1;">
+              <label for="dValues" class="form-label">
+                <i class="fas fa-microchip me-1"></i>Liste des Noeuds
+              </label>
+              <input type="text" class="form-control" id="dValues" placeholder="10,20,30" required 
+                     data-toggle="tooltip" data-placement="top" title="Nombre de noeuds à simuler (séparés par des virgules)" />
+            </div>
+            <div class="form-group col-md-4" style="--order: 2;">
+              <label for="gValues" class="form-label">
+                <i class="fas fa-satellite-dish me-1"></i>Liste des Passerelles
+              </label>
+              <input type="text" class="form-control" id="gValues" placeholder="2,3" required 
+                     data-toggle="tooltip" data-placement="top" title="Nombre de passerelles à simuler (séparés par des virgules)" />
+            </div>
+            <div class="form-group col-md-4" style="--order: 3;">
+              <label for="tValue" class="form-label">
+                <i class="fas fa-hourglass-half me-1"></i>Temps de Simulation (min)
+              </label>
+              <input type="number" class="form-control" id="tValue" placeholder="180" required 
+                     data-toggle="tooltip" data-placement="top" title="Durée totale de la simulation en minutes" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-md-4" style="--order: 4;">
+              <label for="aValues" class="form-label">
+                <i class="fas fa-clock me-1"></i>Périodes d'Application (min)
+              </label>
+              <input type="text" class="form-control" id="aValues" placeholder="3,6,9" required 
+                     data-toggle="tooltip" data-placement="top" title="Périodes entre les envois de messages (séparées par des virgules)" />
+            </div>
+            <div class="form-group col-md-4" style="--order: 5;">
+              <label for="pValues" class="form-label">
+                <i class="fas fa-database me-1"></i>Tailles de Charge Utile (octets)
+              </label>
+              <input type="text" class="form-control" id="pValues" placeholder="10,20" required 
+                     data-toggle="tooltip" data-placement="top" title="Tailles des paquets à envoyer (séparées par des virgules)" />
+            </div>
+            <div class="form-group col-md-4" style="--order: 6;">
+              <label for="rValue" class="form-label">
+                <i class="fas fa-redo me-1"></i>Nombre de Répétitions
+              </label>
+              <input type="number" class="form-control" id="rValue" placeholder="3" required 
+                     data-toggle="tooltip" data-placement="top" title="Nombre de fois que chaque simulation sera répétée" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-md-4" style="--order: 7;">
+              <label for="DValue" class="form-label">
+                <i class="fas fa-random me-1"></i>Déploiement Aléatoire
+              </label>
+              <select class="form-control custom-select-vertical" id="DValue">
+                <option value="false">Non</option>
+                <option value="true">Oui</option>
+                <option value="true,false">Oui & Non</option>
+              </select>
+            </div>
+            <div class="form-group col-md-4" style="--order: 8;">
+              <label for="TValue" class="form-label">
+                <i class="fas fa-project-diagram me-1"></i>Modèle de Trafic Poisson
+              </label>
+              <select class="form-control custom-select-vertical" id="TValue">
+                <option value="false">Non</option>
+              </select>
+            </div>
+            <div class="form-group col-md-4" style="--order: 9;">
+              <label for="Mecanisme" class="form-label">
+                <i class="fas fa-cogs me-1"></i>Mécanisme
+              </label>
+              <select class="form-control custom-select-vertical" id="Mecanisme">
+                <option value="LLNRM">LLNRM</option>
+                <option value="GeoNet">GeoNet</option>
+                <option value="ADR">ADR</option>
+                <option value="Nouveau">Nouveau mécanisme</option>
+            </select>
+            
+            <div class="mb-3" id="importCCContainer" style="display:none;">
+                <label for="importCC" class="form-label">Importer un fichier .cc</label>
+                <input type="file" id="importCC" accept=".cc" class="form-control">
+            </div>
+          </div>
+
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-4" style="--order: 10;">
+                <label for="radius" class="form-label">
+                    <i class="fas fa-arrows-alt-h me-1"></i>Rayon de simulation (mètres)
+                </label>
+                <input type="number" class="form-control" id="radius" name="radius" value="7500" readonly>
+            </div>
+            <div class="form-group col-md-8" style="--order: 11;">
+                <label for="centerCoordinates" class="form-label">
+                    <i class="fas fa-map-marker-alt me-1"></i>Coordonnées du centre (Lat, Lng)
+                </label>
+                <input type="text" class="form-control" id="centerCoordinates" name="centerCoordinates" value="0,0" readonly>
+            </div>
+        </div>
+          <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary btn-lg" id="btnExecuter">
+              <i class="fas fa-play-circle me-2"></i>Exécuter la Simulation
+            </button>
+          </div>
+        </form>
+        
+        <div class="text-center mt-3">
+          <button class="btn btn-primary btn-lg" id="btnAfficherCourbes" onclick="chargerDepuisHistorique()">
+            <i class="fas fa-chart-line me-2"></i>Récupération des Résultats
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="loader" class="text-center" style="display: none;">
+      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+        <span class="sr-only">Chargement...</span>
+      </div>
+      <p class="mt-3">Simulation en cours... Veuillez patienter</p>
+    </div>
+
+    <div id="progressWrapper" class="card mt-3" style="display: none;">
+      <div class="card-body">
+        <div class="d-flex justify-content-between mb-2">
+          <label for="progressBar" class="form-label">Progression de la simulation :</label>
+          <span id="progressText">0%</span>
+        </div>
+        <div class="progress">
+          <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+               style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="resultContainer" class="card result-container" style="display: none;">
+      <div class="card-header">
+        <i class="fas fa-file-alt me-2"></i>Résultats de la Simulation
+      </div>
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="mb-0">Sortie de la simulation</h4>
+          <div class="btn-action-group">
+            <button class="btn btn-danger" onclick="stopSimulation()">
+              <i class="fas fa-stop-circle me-1"></i>Arrêter
+            </button>
+            <button class="btn btn-secondary" onclick="downloadResult()">
+              <i class="fas fa-download me-1"></i>Télécharger
+            </button>
+          </div>
+        </div>
+        <textarea id="resultOutput" rows="15" class="form-control" readonly></textarea>
+      </div>
+    </div>
+
+    <div id="resultGraphContainer" class="card result-container" style="display: none;">
+      <div class="card-header">
+        <i class="fas fa-chart-bar me-2"></i>Performance Charts
+      </div>
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="mb-0">Graphiques de performance</h4>
+          <button id="downloadZipBtn" class="btn btn-success">
+            <i class="fas fa-file-archive me-1"></i>Download Charts
+          </button>
+        </div>
+        
+        <div class="d-flex flex-wrap gap-2 mt-3 mb-3">
+          <button class="btn btn-light border rounded-pill px-3 py-2 shadow-sm" onclick="afficherGraphiques(groupes)">
+            <i class="fas fa-chart-line me-1"></i><strong>PDR</strong>
+          </button>
+          
+          <button class="btn btn-light border rounded-pill px-3 py-2 shadow-sm" onclick="afficherGraphiquesMultiples(groupes, 'Payload')">
+            <i class="fas fa-bars me-1"></i><strong>Payload</strong>
+          </button>
+          
+          <button class="btn btn-light border rounded-pill px-3 py-2 shadow-sm" onclick="afficherGraphiquesMultiples(groupes, 'GW')">
+            <i class="fas fa-satellite-dish me-1"></i><strong>Gateways</strong>
+          </button>
+          
+          <button class="btn btn-light border rounded-pill px-3 py-2 shadow-sm" onclick="afficherGraphiquesMultiples(groupes, 'Période')">
+            <i class="fas fa-clock me-1"></i><strong>Period</strong>
+          </button>
+        </div>
+        
+        <div id="pdrChartContainer">
+          <div id="carousel" class="carousel slide" data-ride="carousel">
+            <ol class="carousel-indicators" id="carouselIndicators"></ol>
+            <div class="carousel-inner" id="carouselItems"></div>
+            <a class="carousel-control-prev" href="#carousel" role="button" data-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="sr-only">Précédent</span>
+            </a>
+            <a class="carousel-control-next" href="#carousel" role="button" data-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="sr-only">Suivant</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<!-- Modal pour la visualisation 3D -->
+<div class="modal fade" id="view3dModal" tabindex="-1" role="dialog" aria-labelledby="view3dModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="view3dModalLabel">
+                  <i class="fas fa-cube me-2"></i>Visualisation 3D de la zone sélectionnée
+              </h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+          <div class="modal-body p-0">
+              <div id="view3dContainer"></div>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                  <i class="fas fa-times me-2"></i>Fermer
+              </button>
+          </div>
+      </div>
+  </div>
+</div>
+  <script>
+    const mecanismeSelect = document.getElementById('Mecanisme');
+const importContainer = document.getElementById('importCCContainer');
+const editor = document.getElementById('customFunctions');
+
+// Afficher ou cacher le champ d'import selon la sélection
+mecanismeSelect.addEventListener('change', () => {
+    if (mecanismeSelect.value === 'Nouveau') {
+        importContainer.style.display = 'block';
+        editor.value = ''; // on peut aussi vider l'éditeur
+    } else {
+        importContainer.style.display = 'none';
+    }
+});
+
+// Charger le fichier .cc dans l'éditeur
+document.getElementById('importCC').addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        editor.value = e.target.result; // mettre le contenu dans l'éditeur
+    };
+    reader.readAsText(file);
+});
+
+    // Ajout des icônes Font Awesome
+    const fontAwesome = document.createElement('link');
+    fontAwesome.rel = 'stylesheet';
+    fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css';
+    document.head.appendChild(fontAwesome);
+
+    let eventSource = null;
+    let groupes = {};
+
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip();
+    });
+
+    document.getElementById("form").addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const dValues = document.getElementById("dValues").value;
+      const gValues = document.getElementById("gValues").value;
+      const tValue  = document.getElementById("tValue").value;
+      const aValues = document.getElementById("aValues").value;
+      const pValues = document.getElementById("pValues").value;
+      const rValue  = document.getElementById("rValue").value;
+      const DValue  = document.getElementById("DValue").value;
+      const TValue  = document.getElementById("TValue").value;
+      const Mecanisme  = document.getElementById("Mecanisme").value;
+
+      localStorage.setItem('simulationParams', JSON.stringify({
+        dValues, gValues, tValue, aValues, pValues, rValue, DValue, TValue
+      }));
+
+      const url = `/execute?dValues=${dValues}&gValues=${gValues}&tValue=${tValue}&aValues=${aValues}&pValues=${pValues}&rValue=${rValue}&DValue=${DValue}&TValue=${TValue}&Mecanisme=${Mecanisme}`;
+      eventSource = new EventSource(url);
+
+      document.getElementById("loader").style.display = "block";
+      const resultOutput = document.getElementById("resultOutput");
+      resultOutput.value = "";
+      document.getElementById("resultContainer").style.display = 'block';
+      document.getElementById("resultGraphContainer").style.display = 'none';
+
+      eventSource.onmessage = function(event) {
+        resultOutput.value += event.data + "\n";
+        resultOutput.scrollTop = resultOutput.scrollHeight;
+
+        document.getElementById("progressWrapper").style.display = "block";
+        const match = event.data.match(/Progression\s*:\s*\d+\s*\/\s*\d+\s*\((\d+\.?\d*)%\)/);
+        if (match) {
+          const percent = parseFloat(match[1]);
+          const progressBar = document.getElementById("progressBar");
+          progressBar.style.width = `${percent}%`;
+          progressBar.setAttribute("aria-valuenow", percent);
+          document.getElementById("progressText").innerText = `${percent}%`;
+        }
+
+        if (event.data.includes("OK")) {
+          eventSource.close();
+          document.getElementById("loader").style.display = "none";
+          resultOutput.value += "\n✅ Simulation terminée avec succès.\n";
+
+          const progressBar = document.getElementById("progressBar");
+          progressBar.style.width = "100%";
+          progressBar.setAttribute("aria-valuenow", 100);
+          document.getElementById("progressText").innerText = "100%";
+
+          const simulationText = resultOutput.value;
+          groupes = lireFichierTxt(simulationText);
+          afficherGraphiques(groupes);
+        }
+      };
+
+      eventSource.onerror = function(event) {
+        console.error("Erreur SSE :", event);
+        if (eventSource) eventSource.close();
+        document.getElementById("loader").style.display = "none";
+      };
+    });
+
+    function stopSimulation() {
+      fetch('/stop')
+        .then(res => res.text())
+        .then(msg => {
+          if (eventSource) eventSource.close();
+          document.getElementById("resultOutput").value += "\n" + msg;
+          document.getElementById("loader").style.display = "none";
+          localStorage.removeItem('eventSourceState');
+          localStorage.removeItem('simulationParams');
+        });
+    }
+
+    function downloadResult() {
+      const content = document.getElementById("resultOutput").value;
+      const blob = new Blob([content], { type: 'text/plain' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `resultats_simulation_${new Date().toISOString().slice(0,10)}.txt`;
+      link.click();
+    }
+
+    function lireFichierTxt(fichier) {
+      const groupes = {};
+      let contexte = "", appPeriod = "", payload = "", nGateway = "", deploiement = "", trafic = "";
+
+      const lignes = fichier.split("\n");
+
+      lignes.forEach(ligne => {
+        ligne = ligne.trim();
+        if (ligne.includes("deploiement_aleatoire") && ligne.includes("Trafic_poisson")) {
+          const matchDep = ligne.match(/deploiement_aleatoire=(\w+)/);
+          const matchTraf = ligne.match(/Trafic_poisson=(\w+)/);
+          if (matchDep && matchTraf) {
+            deploiement = matchDep[1];
+            trafic = matchTraf[1];
+            contexte = `D_aleatoire=${deploiement} | T_poisson=${trafic}`;
+          }
+        } else if (ligne.includes("période d'application de")) {
+          const match = ligne.match(/période d'application de (\d+)/);
+          if (match) appPeriod = match[1];
+        } else if (ligne.includes("taille de charge utile de")) {
+          const match = ligne.match(/charge utile de (\d+)/);
+          if (match) payload = match[1];
+        } else if (ligne.includes("Pour") && ligne.includes("Passerelles")) {
+          const match = ligne.match(/Pour (\d+)/);
+          if (match) nGateway = match[1];
+        } else if (ligne.includes("|") && ligne.includes("Deploiement=")) {
+          const parts = ligne.split("|").map(p => p.trim());
+          if (parts.length >= 4) {
+            try {
+              const noeud = parseInt(parts[0]);
+              const pdr = parseFloat(parts[3]) * 100;
+              const nomCourbe = `${contexte} | Période=${appPeriod} | Payload=${payload} | GW=${nGateway}`;
+              if (!groupes[nomCourbe]) groupes[nomCourbe] = [];
+              groupes[nomCourbe].push({ noeud, pdr });
+            } catch (e) {
+              console.error("Erreur de traitement des données :", e);
+            }
+          }
+        }
+      });
+      return groupes;
+    }
+
+    function clearCharts() {
+      const carouselItems = document.getElementById("carouselItems");
+      carouselItems.innerHTML = "";
+      const carouselIndicators = document.getElementById("carouselIndicators");
+      carouselIndicators.innerHTML = "";
+    }
+
+    function chargerDepuisHistorique() {
+      document.getElementById("loader").style.display = "block";
+      document.getElementById("progressWrapper").style.display = "block";
+      
+      fetch('/api/historique')
+        .then(response => response.text())
+        .then(texte => {
+          const resultOutput = document.getElementById("resultOutput");
+          resultOutput.value = texte;
+          document.getElementById("resultContainer").style.display = 'block';
+          document.getElementById("loader").style.display = "none";
+
+          // ✅ mise à jour de la variable globale !
+          groupes = lireFichierTxt(texte);
+
+          afficherGraphiques(groupes);
+          mettreAJourProgressionDepuisHistorique(texte);
+
+          document.getElementById("downloadZipBtn").onclick = function() {
+            downloadZip(groupes);
+          };
+        })
+        .catch(err => {
+          console.error("Erreur lors du chargement de l'historique :", err);
+          alert("Impossible de charger le fichier historique.");
+          document.getElementById("loader").style.display = "none";
+        });
+    }
+
+    function mettreAJourProgressionDepuisHistorique(fichierHistorique) {
+      const lignes = fichierHistorique.split("\n");
+      let progression = 0;
+      let maxProgression = 0;
+
+      // Trouver la progression maximale dans le fichier
+      lignes.forEach(ligne => {
+        const match = ligne.match(/Progression\s*:\s*(\d+)\s*\/\s*(\d+)\s*\((\d+\.?\d*)%\)/);
+        if (match) {
+          const current = parseInt(match[1]);
+          const total = parseInt(match[2]);
+          const percent = parseFloat(match[3]);
+          
+          if (percent > progression) {
+            progression = percent;
+          }
+          if (total > maxProgression) {
+            maxProgression = total;
+          }
+        }
+      });
+      // Mettre à jour la barre de progression
+      const progressBar = document.getElementById("progressBar");
+      const progressText = document.getElementById("progressText");
+      
+      if (maxProgression > 0) {
+        progressBar.style.width = `${progression}%`;
+        progressBar.setAttribute("aria-valuenow", progression);
+        progressText.innerText = `${progression}% (${Math.round(progression * maxProgression / 100)}/${maxProgression})`;
+      } else {
+        progressBar.style.width = "100%";
+        progressBar.setAttribute("aria-valuenow", 100);
+        progressText.innerText = "100% (données historiques)";
+      }
+    }
+    function afficherGraphiques(groupes) {
+  document.getElementById("loader").style.display = "none";
+  document.getElementById("resultGraphContainer").style.display = "block";
+  clearCharts();
+
+  const carouselIndicators = document.getElementById("carouselIndicators");
+  
+  Object.keys(groupes).forEach((nomCourbe, index) => {
+    const valeurs = groupes[nomCourbe].sort((a, b) => a.noeud - b.noeud);
+    const x = valeurs.map(v => v.noeud);
+    const y = valeurs.map(v => v.pdr);
+
+    // Crée l’indicateur de carousel
+    const indicator = document.createElement("li");
+    indicator.dataset.target = "#carousel";
+    indicator.dataset.slideTo = index;
+    if (index === 0) indicator.classList.add("active");
+    carouselIndicators.appendChild(indicator);
+
+    // Crée l’item du carousel
+    const carouselItem = document.createElement("div");
+    carouselItem.classList.add("carousel-item");
+    if (index === 0) carouselItem.classList.add("active");
+
+    const canvas = document.createElement("canvas");
+    canvas.id = `chart${index}`;
+    carouselItem.appendChild(canvas);
+    document.getElementById("carouselItems").appendChild(carouselItem);
+
+    new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels: x,
+        datasets: [{
+          label: nomCourbe,
+          data: y,
+          borderColor: getRandomColor(),
+          backgroundColor: 'rgba(52, 152, 219, 0.1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: getRandomColor(),
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          title: {
+            display: true,
+            text: nomCourbe,
+            font: {
+              size: 16,
+              weight: 'bold'
+            },
+            padding: {
+              top: 10,
+              bottom: 20
+            }
+          },
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return `Noeud ${context.label}: ${context.raw.toFixed(2)}%`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Number of Nodes',
+              font: { weight: 'bold' }
+            },
+            grid: { display: false }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Packet Delivery Ratio (%)',
+              font: { weight: 'bold' }
+            },
+            min: 0,
+            max: 100,
+            ticks: {
+              callback: value => value + '%'
+            }
+          }
+        }
+      }
+    });
+  });
+
+  $('#carousel').carousel();
+}
+
+
+    function getRandomColor() {
+      const colors = [
+        '#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6',
+        '#1abc9c', '#d35400', '#34495e', '#16a085', '#c0392b'
+      ];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedParams = JSON.parse(localStorage.getItem('simulationParams'));
+      if (savedParams) {
+        document.getElementById("dValues").value = savedParams.dValues || '';
+        document.getElementById("gValues").value = savedParams.gValues || '';
+        document.getElementById("tValue").value  = savedParams.tValue || '';
+        document.getElementById("aValues").value = savedParams.aValues || '';
+        document.getElementById("pValues").value = savedParams.pValues || '';
+        document.getElementById("rValue").value  = savedParams.rValue || '';
+        document.getElementById("DValue").value  = savedParams.DValue || 'false';
+        document.getElementById("TValue").value  = savedParams.TValue || 'false';
+      }
+    });
+
+    function downloadZip(groupes) {
+      const zip = new JSZip();
+      const chartFiles = [];
+
+      // Créer un fichier .png pour chaque graphique généré
+      Object.keys(groupes).forEach((nomCourbe, index) => {
+        const canvas = document.getElementById(`chart${index}`);
+        if (canvas) {
+          // Convertir chaque graphique en image PNG
+          const imgData = canvas.toDataURL("image/png");
+
+          // Convertir l'image en binaire
+          const byteString = atob(imgData.split(',')[1]);
+          const byteArray = new Uint8Array(byteString.length);
+          for (let i = 0; i < byteString.length; i++) {
+            byteArray[i] = byteString.charCodeAt(i);
+          }
+
+          // Ajouter l'image au fichier .zip
+          zip.file(`${nomCourbe.replace(/[\/\\?%*:|"<>]/g, '_')}.png`, byteArray);
+        }
+      });
+
+      // Générer et télécharger le fichier .zip
+      zip.generateAsync({ type: "blob" })
+        .then(function(content) {
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(content);
+          link.download = `courbes_simulation_${new Date().toISOString().slice(0,10)}.zip`;
+          link.click();
+        });
+    }
+
+
+
+
+
+
+    function regrouperCourbes(groupes, critere = "Payload") {
+  const multiCourbes = {};
+
+  Object.keys(groupes).forEach(nom => {
+    // Nouveau regex qui capture aussi Deploiement et Trafic
+    const regex = /D_aleatoire=(\w+)\s+\|\s+T_poisson=(\w+).*?Période=(\d+)\s+\|\s+Payload=(\d+)\s+\|\s+GW=(\d+)/;
+    const match = nom.match(regex);
+    
+    if (match) {
+      const [_, deploiement, trafic, periode, payload, gw] = match;
+      let cle = `D=${deploiement} | T=${trafic} | `;
+      
+      if (critere === "Payload") cle += `P=${periode} | GW=${gw}`;
+      else if (critere === "GW") cle += `P=${periode} | Payload=${payload}`;
+      else if (critere === "Période") cle += `Payload=${payload} | GW=${gw}`;
+
+      if (!multiCourbes[cle]) multiCourbes[cle] = [];
+      multiCourbes[cle].push({ 
+        label: nom, 
+        data: groupes[nom],
+        deploiement,
+        trafic
+      });
+    }
+  });
+
+  return multiCourbes;
+}
+function afficherGraphiquesMultiples(sourceGroupes, critere = "Payload") {
+  if (!sourceGroupes || Object.keys(sourceGroupes).length === 0) {
+    if (typeof groupes !== 'undefined' && groupes && Object.keys(groupes).length > 0) {
+      sourceGroupes = groupes;
+    } else {
+      alert("Aucune donnée de simulation disponible.");
+      return;
+    }
+  }
+
+  const regroupements = regrouperCourbes(sourceGroupes, critere);
+  clearCharts();
+  const carouselIndicators = document.getElementById("carouselIndicators");
+
+  Object.keys(regroupements).forEach((cle, index) => {
+    const series = regroupements[cle];
+
+    const datasets = series.map((serie, i) => {
+      let legende = "";
+      const regex = /D_aleatoire=(\w+)\s+\|\s+T_poisson=(\w+).*?Période=(\d+)\s+\|\s+Payload=(\d+)\s+\|\s+GW=(\d+)/;
+      const match = serie.label.match(regex);
+      
+      if (match) {
+        const [_, deploiement, trafic, periode, payload, gw] = match;
+        
+        // Nouveau format de légende qui inclut les paramètres pertinents
+        if (critere === 'Payload') legende = `Payload=${payload} (D=${deploiement}, T=${trafic})`;
+        else if (critere === 'GW') legende = `GW=${gw} (D=${deploiement}, T=${trafic})`;
+        else if (critere === 'Période') legende = `Période=${periode} (D=${deploiement}, T=${trafic})`;
+      } else {
+        legende = serie.label.replace(/\s*\|\s*/g, " |");
+      }
+
+      // Couleur basée sur le critère principal + paramètres
+      const hue = (i * 360 / series.length) % 360;
+      const saturation = serie.deploiement === 'true' ? '70%' : '40%';
+      const lightness = serie.trafic === 'true' ? '50%' : '60%';
+      const couleur = `hsl(${hue}, ${saturation}, ${lightness})`;
+
+      return {
+        label: legende,
+        data: serie.data.sort((a, b) => a.noeud - b.noeud).map(p => p.pdr),
+        borderColor: couleur,
+        backgroundColor: couleur,
+        fill: false,
+        tension: 0.3,
+        pointRadius: 3,
+        borderDash: serie.deploiement === 'true' ? [] : [5, 5], // Style différent pour déploiement aléatoire
+        borderWidth: serie.trafic === 'true' ? 2 : 1 // Épaisseur différente pour trafic poisson
+      };
+    });
+
+    // Reste du code inchangé...
+    const labels = series[0].data.sort((a, b) => a.noeud - b.noeud).map(p => p.noeud);
+
+    const indicator = document.createElement("li");
+    indicator.dataset.target = "#carousel";
+    indicator.dataset.slideTo = index;
+    if (index === 0) indicator.classList.add("active");
+    carouselIndicators.appendChild(indicator);
+
+    const carouselItem = document.createElement("div");
+    carouselItem.classList.add("carousel-item");
+    if (index === 0) carouselItem.classList.add("active");
+
+    const canvas = document.createElement("canvas");
+    canvas.id = `multiChart${index}`;
+    carouselItem.appendChild(canvas);
+    document.getElementById("carouselItems").appendChild(carouselItem);
+
+    new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: datasets
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: `Simulation Time= 240 min | Include Buildings=True | Traffic Poisson=false | Period=3 min | Payload=20 | Nbre of Repetitions=100
+ ${critere} : ${cle}`,
+            font: { size: 16, weight: 'bold' }
+          },
+          legend: {
+            display: true,
+            position: 'right',
+            labels: {
+              boxWidth: 12,
+              padding: 15,
+              usePointStyle: true,
+              font: {
+                size: 12,
+                family: 'Roboto',
+                weight: 'normal'
+              }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: ctx => {
+                const label = ctx.dataset.label || '';
+                const value = ctx.raw.toFixed(2) + '%';
+                return `${label}: ${value}`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: { 
+            title: { 
+              display: true, 
+              text: 'Number of Nodes',
+              font: { weight: 'bold' }
+            } 
+          },
+          y: {
+            title: { 
+              display: true, 
+              text: 'PDR (%)',
+              font: { weight: 'bold' }
+            },
+            min: 0, 
+            max: 100,
+            ticks: { 
+              callback: val => val + '%',
+              stepSize: 10
+            }
+          }
+        },
+        interaction: {
+          mode: 'nearest',
+          axis: 'x',
+          intersect: false
+        }
+      }
+    });
+  });
+}
+
+
+
+
+
+// Initialisation de la carte
+let map, drawnCircle, drawControl, centerMarker;
+
+function initMap() {
+    // Initialiser la carte centrée sur Paris par défaut
+    map = L.map('map').setView([48.8566, 2.3522], 13);
+    
+    // Ajouter la couche OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    
+    // Ajouter la recherche
+    const searchControl = new L.Control.Search({
+        position: 'topleft',
+        layer: L.layerGroup(),
+        initial: false,
+        zoom: 14,
+        marker: false,
+        textPlaceholder: 'Rechercher une ville...'
+    });
+    
+    searchControl.on('search:locationfound', function(e) {
+        if (drawnCircle) {
+            map.removeLayer(drawnCircle);
+        }
+        if (centerMarker) {
+            map.removeLayer(centerMarker);
+        }
+        
+        // Centrer la carte sur le résultat
+        map.setView(e.latlng, 14);
+        
+        // Créer un cercle autour de la position trouvée
+        drawnCircle = L.circle(e.latlng, {
+            color: '#3388ff',
+            weight: 2,
+            fillColor: '#3388ff',
+            fillOpacity: 0.2,
+            radius: 1000
+        }).addTo(map);
+        
+        // Mettre à jour les informations
+        document.getElementById('radiusValue').textContent = '1000';
+        document.getElementById('radius').value = '1000';
+        document.getElementById('centerCoordinates').value = `${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`
+        // Activer le bouton de visualisation 3D
+        document.getElementById('view3dBtn').disabled = false;
+    });
+    
+    map.addControl(searchControl);
+    
+    // Activer la recherche depuis la barre de recherche personnalisée
+    document.getElementById('addressSearch').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const query = this.value;
+            if (query.length > 2) {
+                // Utiliser Nominatim pour la géocodage
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.length > 0) {
+                            const result = data[0];
+                            const latlng = L.latLng(parseFloat(result.lat), parseFloat(result.lon));
+                            
+                            if (drawnCircle) {
+                                map.removeLayer(drawnCircle);
+                            }
+                            if (centerMarker) {
+                                map.removeLayer(centerMarker);
+                            }
+                            
+                            // Centrer la carte sur le résultat
+                            map.setView(latlng, 14);
+                            
+                            // Créer un cercle autour de la position trouvée
+                            drawnCircle = L.circle(latlng, {
+                                color: '#3388ff',
+                                weight: 2,
+                                fillColor: '#3388ff',
+                                fillOpacity: 0.2,
+                                radius: 1000
+                            }).addTo(map);
+                            
+                            // Mettre à jour les informations
+                            document.getElementById('radiusValue').textContent = '1000';
+                            document.getElementById('radius').value = '1000';
+                            document.getElementById('centerCoordinates').value = `${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`;
+                            
+                            // Activer le bouton de visualisation 3D
+                            document.getElementById('view3dBtn').disabled = false;
+                        }
+                    });
+            }
+        }
+    });
+    
+    // Activer le dessin de cercle
+    document.getElementById('drawCircleBtn').addEventListener('click', function() {
+        if (drawnCircle) {
+            map.removeLayer(drawnCircle);
+        }
+        if (centerMarker) {
+            map.removeLayer(centerMarker);
+        }
+        
+        // Mode dessin de cercle
+        let circle;
+        
+        // Fonction pour créer le cercle
+        function createCircle(latlng, radius) {
+            if (circle) {
+                map.removeLayer(circle);
+            }
+            circle = L.circle(latlng, {
+                color: '#3388ff',
+                weight: 2,
+                fillColor: '#3388ff',
+                fillOpacity: 0.2,
+                radius: radius
+            }).addTo(map);
+            
+            // Mettre à jour l'affichage du rayon
+            document.getElementById('radiusValue').textContent = Math.round(radius);
+            document.getElementById('radius').value = Math.round(radius);
+            
+            // Mettre à jour les coordonnées du centre
+            document.getElementById('centerCoordinates').value = `${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`;
+            
+            // Activer le bouton de visualisation 3D
+            document.getElementById('view3dBtn').disabled = false;
+            
+            return circle;
+        }
+        
+        // Gestionnaire d'événements pour le clic sur la carte
+        function onMapClick(e) {
+            if (centerMarker) {
+                map.removeLayer(centerMarker);
+            }
+            
+            // Ajouter un marqueur au centre
+            centerMarker = L.marker(e.latlng).addTo(map)
+                .bindPopup('Centre de simulation').openPopup();
+            
+            // Créer un cercle initial de 1000m
+            drawnCircle = createCircle(e.latlng, 1000);
+            
+            // Gestionnaire pour le déplacement du cercle
+            function onMapMove(e) {
+                if (centerMarker && drawnCircle) {
+                    const center = centerMarker.getLatLng();
+                    const radius = center.distanceTo(e.latlng);
+                    drawnCircle.setRadius(radius);
+                    document.getElementById('radiusValue').textContent = Math.round(radius);
+                    document.getElementById('radius').value = Math.round(radius);
+                }
+            }
+            
+            // Écouter les mouvements de souris pour ajuster le rayon
+            map.on('mousemove', onMapMove);
+            
+            // Arrêter le mode dessin au deuxième clic
+            map.once('click', function() {
+                map.off('mousemove', onMapMove);
+                map.off('click', onMapClick);
+                alert('Cercle défini. Cliquez sur "Dessiner un cercle" pour en créer un nouveau.');
+            });
+        }
+        
+        // Démarrer le mode dessin
+        map.once('click', onMapClick);
+        alert('Cliquez sur la carte pour définir le centre du cercle, puis déplacez la souris pour ajuster le rayon et cliquez à nouveau pour valider.');
+    });
+    
+    // Effacer le cercle
+    document.getElementById('clearCircleBtn').addEventListener('click', function() {
+        if (drawnCircle) {
+            map.removeLayer(drawnCircle);
+            drawnCircle = null;
+        }
+        if (centerMarker) {
+            map.removeLayer(centerMarker);
+            centerMarker = null;
+        }
+        document.getElementById('radiusValue').textContent = '0';
+        document.getElementById('radius').value = '0';
+        document.getElementById('centerCoordinates').value = '0,0';
+        document.getElementById('view3dBtn').disabled = true;
+    });
+    
+    // Visualisation 3D
+    document.getElementById('view3dBtn').addEventListener('click', function() {
+        if (!drawnCircle) return;
+        
+        $('#view3dModal').modal('show');
+        
+        // Initialiser la scène 3D après l'ouverture du modal
+        setTimeout(init3DView, 100);
+    });
+}
+
+// Initialiser la vue 3D
+function init3DView() {
+    const container = document.getElementById('view3dContainer');
+    container.innerHTML = '';
+    
+    // Récupérer les données du cercle
+    const center = drawnCircle.getLatLng();
+    const radius = drawnCircle.getRadius();
+    
+    // Initialiser Three.js
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x87CEEB); // Ciel bleu
+    
+    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera.position.set(0, radius/500, radius/250);
+    
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(renderer.domElement);
+    
+    // Ajouter des contrôles orbitaux
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    
+    // Ajouter de la lumière
+    const ambientLight = new THREE.AmbientLight(0x606060);
+    scene.add(ambientLight);
+    
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(0, 100, 50);
+    scene.add(directionalLight);
+    
+    // Créer le sol
+    const groundGeometry = new THREE.CircleGeometry(radius/1000, 32);
+    const groundMaterial = new THREE.MeshStandardMaterial({ 
+        color: 0x90EE90, // Vert clair
+        roughness: 0.8
+    });
+    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    ground.rotation.x = -Math.PI / 2;
+    scene.add(ground);
+    
+    // Ajouter des bâtiments aléatoires
+    const buildingCount = 30;
+    for (let i = 0; i < buildingCount; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const distance = Math.random() * radius/1000 * 0.8;
+        
+        const x = Math.cos(angle) * distance;
+        const z = Math.sin(angle) * distance;
+        
+        const width = 2 + Math.random() * 4;
+        const depth = 2 + Math.random() * 4;
+        const height = 5 + Math.random() * 15;
+        
+        const buildingGeometry = new THREE.BoxGeometry(width, height, depth);
+        const buildingMaterial = new THREE.MeshStandardMaterial({ 
+            color: Math.random() * 0x888888 + 0x777777,
+            roughness: 0.7
+        });
+        
+        const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
+        building.position.set(x, height/2, z);
+        scene.add(building);
+    }
+    
+    // Ajouter une tour au centre
+    const towerGeometry = new THREE.CylinderGeometry(1, 2, 20, 16);
+    const towerMaterial = new THREE.MeshStandardMaterial({ 
+        color: 0x8888ff,
+        roughness: 0.5,
+        metalness: 0.5
+    });
+    const tower = new THREE.Mesh(towerGeometry, towerMaterial);
+    tower.position.y = 10;
+    scene.add(tower);
+    
+    // Animation
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+    
+    animate();
+    
+    // Redimensionnement
+    window.addEventListener('resize', function() {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+}
+
+// Initialiser la carte quand le document est chargé
+document.addEventListener('DOMContentLoaded', initMap);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+  <!-- Leaflet JS pour la carte -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<!-- Leaflet Search JS -->
+<script src="https://unpkg.com/leaflet-search@2.9.0/dist/leaflet-search.min.js"></script>
+<!-- Three.js pour la visualisation 3D -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- OrbitControls pour Three.js -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</body>
+</html>

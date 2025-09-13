@@ -1,0 +1,2188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NC-LoraSim - Manual Mode</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Leaflet CSS for map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <!-- Leaflet Search CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-search@2.9.0/dist/leaflet-search.min.css" />
+
+    <!-- Chart.js and datalabels plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
+    <style>
+        /* Style to initially hide results sections */
+        .results-section {
+            display: none;
+        }
+        :root {
+            --primary: #2c5aa0;
+            --primary-light: #3a6bc0;
+            --primary-dark: #1e3f73;
+            --secondary: #6c757d;
+            --success: #28a745;
+            --info: #17a2b8;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-800: #343a40;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            font-family: 'Roboto', sans-serif;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+
+        /* Enhanced navigation */
+        .navbar-custom {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 0.8rem 1rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white !important;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand i {
+            margin-right: 10px;
+            font-size: 1.8rem;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            border-radius: 4px;
+            transition: var(--transition);
+            margin: 0 2px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: white !important;
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .nav-link.active {
+            font-weight: 600;
+        }
+
+        .user-menu {
+            color: white;
+            position: relative;
+        }
+
+        .user-menu-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .user-menu-btn:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .user-menu-btn i {
+            margin-left: 8px;
+            transition: var(--transition);
+        }
+
+        .user-menu.show .user-menu-btn i {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: var(--box-shadow);
+            border-radius: var(--border-radius);
+            padding: 0.5rem 0;
+            margin-top: 10px !important;
+        }
+
+        .dropdown-item {
+            padding: 0.5rem 1.5rem;
+            transition: var(--transition);
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--gray-100);
+        }
+
+        .dropdown-item.logout {
+            color: var(--danger);
+        }
+
+        .dropdown-item.logout:hover {
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+
+        /* Main content */
+        .main-container {
+            padding: 2rem 0;
+        }
+
+        .page-title {
+            color: var(--primary-dark);
+            font-weight: 700;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--primary-light);
+            position: relative;
+        }
+
+        .page-title:after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 80px;
+            height: 2px;
+            background-color: var(--success);
+        }
+
+        /* Enhanced cards */
+        .card {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 1.5rem;
+            transition: var(--transition);
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            color: white;
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Enhanced forms */
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .form-control, .form-select {
+            border: 1px solid var(--gray-300);
+            border-radius: var(--border-radius);
+            padding: 0.75rem 1rem;
+            transition: var(--transition);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(44, 90, 160, 0.25);
+        }
+
+        .form-check-input {
+            width: 1.2em;
+            height: 1.2em;
+            margin-top: 0.15em;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .form-check-label {
+            margin-left: 0.5rem;
+            font-weight: 500;
+        }
+
+        /* Enhanced buttons */
+        .btn {
+            border-radius: var(--border-radius);
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(to right, var(--primary-dark), var(--primary));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(44, 90, 160, 0.3);
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        /* Enhanced tables */
+        .table {
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 0 0 1px var(--gray-300);
+        }
+
+        .table th {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 500;
+            border: none;
+            padding: 1rem;
+        }
+
+        .table td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-color: var(--gray-200);
+        }
+
+        .table tr:nth-child(even) {
+            background-color: var(--gray-100);
+        }
+
+        .table tr:hover {
+            background-color: rgba(44, 90, 160, 0.05);
+        }
+
+        .table-responsive {
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        /* Enhanced map */
+        #map-container {
+            margin-bottom: 1.5rem;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            width: 100%;
+            height: 500px;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-controls {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .radius-info {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            z-index: 1000;
+            background: white;
+            padding: 8px 12px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .search-container {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 1000;
+            width: 280px;
+        }
+
+        /* Charts */
+        .chart-container {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--box-shadow);
+        }
+
+        .chart-title {
+            color: var(--primary-dark);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--gray-300);
+        }
+
+        /* Chart navigation */
+        .graph-nav {
+            display: flex;
+            justify-content: center;
+            margin: 1.5rem 0;
+            gap: 1rem;
+        }
+        .results-section.graph-nav {
+            display: none;
+        }
+        .graph-nav-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary);
+            color: white;
+            border: none;
+            transition: var(--transition);
+            box-shadow: var(--box-shadow);
+        }
+
+        .graph-nav-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+
+        /* Advanced configuration */
+        .advanced-config {
+            background: linear-gradient(145deg, #2b2b3b, #21212e);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-top: 1rem;
+            color: white;
+        }
+
+        .editor-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .help-icon {
+            width: 22px;
+            filter: invert(70%);
+            transition: var(--transition);
+            margin-left: 10px;
+        }
+
+        .help-icon:hover {
+            transform: scale(1.3);
+            filter: invert(40%);
+        }
+
+        #customFunctions {
+            width: 100%;
+            min-height: 250px;
+            background-color: #1e1e2f;
+            color: #d4d4d4;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 1rem;
+            border: none;
+            border-radius: var(--border-radius);
+            resize: vertical;
+            box-shadow: inset 2px 2px 6px rgba(0,0,0,0.3);
+        }
+
+        #customFunctions:focus {
+            outline: none;
+            box-shadow: inset 2px 2px 8px rgba(0,0,0,0.5), 0 0 8px var(--primary-light);
+        }
+
+        /* Badges */
+        .badge {
+            padding: 0.5rem 0.8rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        /* Status indicators */
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-success {
+            background-color: var(--success);
+        }
+
+        .status-warning {
+            background-color: var(--warning);
+        }
+
+        .status-danger {
+            background-color: var(--danger);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+            
+            .nav-link {
+                padding: 0.5rem !important;
+                font-size: 0.9rem;
+            }
+            
+            .page-title {
+                font-size: 1.5rem;
+            }
+            
+            #map-container {
+                height: 350px;
+            }
+            
+            .search-container {
+                width: calc(100% - 30px);
+            }
+            
+            .map-controls {
+                flex-direction: row;
+                bottom: 15px;
+                top: auto;
+                right: 15px;
+            }
+        }
+         /* Styles for terminal */
+    .terminal-output {
+        background-color: #1e1e1e;
+        color: #d4d4d4;
+        font-family: 'Courier New', monospace;
+        padding: 1rem;
+        height: 250px;
+        overflow-y: auto;
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+    }
+    
+    .terminal-line {
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+        white-space: pre-wrap;
+    }
+    
+    .terminal-command {
+        color: #569cd6;
+    }
+    
+    .terminal-error {
+        color: #f44747;
+    }
+    
+    .terminal-success {
+        color: #6a9955;
+    }
+    
+    .terminal-warning {
+        color: #d7ba7d;
+    }
+    
+    /* Custom scrollbar for terminal */
+    .terminal-output::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .terminal-output::-webkit-scrollbar-track {
+        background: #2d2d2d;
+    }
+    
+    .terminal-output::-webkit-scrollbar-thumb {
+        background: #5a5a5a;
+        border-radius: 4px;
+    }
+    
+    .terminal-output::-webkit-scrollbar-thumb:hover {
+        background: #707070;
+    }
+    </style>
+</head>
+<body>
+<!-- Enhanced navigation bar -->
+<nav class="navbar navbar-expand-lg navbar-custom">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <i class="fas fa-satellite"></i>NC-LoraSim
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" 
+                aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/choix.html">
+                        <i class="fas fa-home me-1"></i>Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/connexion.html">
+                        <i class="fas fa-sign-in-alt me-1"></i>Login
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/simulation-manager.html">
+                        <i class="fas fa-cogs me-1"></i>Automatic Mode
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/NS3-LoRaWan.html">
+                        <i class="fas fa-sliders-h me-1"></i>Manual Mode
+                    </a>
+                </li>
+                <!-- New item for Researcher Mode -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/chercher.html">
+                        <i class="fas fa-chart-line me-1"></i>Advanced Mode
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="user-menu">
+                <button class="user-menu-btn">
+                    <i class="fas fa-user-circle me-2"></i>My Account
+                    <i class="fas fa-chevron-down ms-1"></i>
+                </button>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item logout" href="#">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+  
+    <div class="container main-container">
+        <h1 class="page-title text-center">NC-LoraSim: Manual Mode</h1>
+
+        <!-- Map for selecting simulation area -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-map-marked-alt me-2"></i>Simulation Area Selection
+            </div>
+            <div class="card-body p-0">
+                <div id="map-container">
+                    <div id="map"></div>
+                    <div class="search-container">
+                        <div class="input-group">
+                            <input type="text" id="addressSearch" class="form-control" placeholder="Search for a city, town...">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="button">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="map-controls">
+                        <button id="drawCircleBtn" class="btn btn-primary btn-sm">
+                            <i class="fas fa-draw-circle me-1"></i>Area
+                        </button>
+                        <button id="view3dBtn" class="btn btn-info btn-sm" disabled>
+                            <i class="fas fa-cube me-1"></i>3D
+                        </button>
+                        <button id="clearCircleBtn" class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash me-1"></i>Clear
+                        </button>
+                    </div>
+                    <div class="radius-info">
+                        <i class="fas fa-ruler-combined me-1"></i>Radius: <span id="radiusValue">0</span> meters
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+              <i class="fas fa-cogs me-2"></i>Simulation Parameters
+            </div>
+            <div class="card-body">
+              <form id="form">
+          
+                <!-- Row 1: Nodes, gateways, payload, frequency -->
+                <div class="form-row">
+                  <div class="form-group col-md-3">
+                    <label for="appPeriod" class="form-label">
+                      <i class="fas fa-clock me-1"></i>Sending Frequency (minutes)
+                    </label>
+                    <input type="number" class="form-control" id="appPeriod" name="appPeriod" value="12">
+                  </div>
+          
+                  <div class="form-group col-md-3">
+                    <label for="payload" class="form-label">
+                      <i class="fas fa-database me-1"></i>Payload (bytes)
+                    </label>
+                    <input type="number" class="form-control" id="payload" name="payload" value="20">
+                  </div>
+          
+                  <div class="form-group col-md-3">
+                    <label for="nGateways" class="form-label">
+                      <i class="fas fa-satellite-dish me-1"></i>Number of Gateways
+                    </label>
+                    <input type="number" class="form-control" id="nGateways" name="nGateways" value="3">
+                  </div>
+          
+                  <div class="form-group col-md-3">
+                    <label for="nDevices" class="form-label">
+                      <i class="fas fa-microchip me-1"></i>Number of Nodes
+                    </label>
+                    <input type="number" class="form-control" id="nDevices" name="nDevices" value="30">
+                  </div>
+                </div>
+          
+                <!-- Row 2: Radius, duration, repetitions, coordinates -->
+                <div class="form-row">
+                  <div class="form-group col-md-3">
+                    <label for="radius" class="form-label">
+                      <i class="fas fa-arrows-alt-h me-1"></i>Simulation Radius (m)
+                    </label>
+                    <input type="number" class="form-control" id="radius" name="radius" value="7500" readonly>
+                  </div>
+          
+                  <div class="form-group col-md-3">
+                    <label for="simulationTime" class="form-label">
+                      <i class="fas fa-hourglass-half me-1"></i>Simulation Duration (minutes)
+                    </label>
+                    <input type="number" class="form-control" id="simulationTime" name="simulationTime" value="60">
+                  </div>
+          
+                  <div class="form-group col-md-3">
+                    <label for="nRuns" class="form-label">
+                      <i class="fas fa-sync-alt me-1"></i>Number of Repetitions
+                    </label>
+                    <input type="number" class="form-control" id="nRuns" name="nRuns" value="3" min="1">
+                  </div>
+          
+                  <div class="form-group col-md-3">
+                    <label for="centerCoordinates" class="form-label">
+                      <i class="fas fa-map-marker-alt me-1"></i>Center Coordinates (Lat,Lng)
+                    </label>
+                    <input type="text" class="form-control" id="centerCoordinates" name="centerCoordinates" value="0,0" readonly>
+                  </div>
+                </div>
+          
+                <!-- Row 3: Propagation model, BW, CR, interference -->
+                <div class="form-row">
+                  <div class="form-group col-md-3">
+                    <label for="propagationModel" class="form-label">
+                      <i class="fas fa-antenna me-1"></i>Propagation Model
+                    </label>
+                    <select class="form-control" id="propagationModel" name="propagationModel" style="font-size:1rem; padding:0.5rem;">
+                      <option value="LOG_DISTANCE" selected>LogDistancePropagationLossModel</option>
+                      <option value="NAKAGAMI">NakagamiPropagationLossModel</option>
+                      <option value="OKUMURA_HATA">OkumuraHataPropagationLossModel</option>
+                      <option value="SHADOWING">ShadowingPropagationLossModel</option>
+                    </select>
+                  </div>
+          
+                  <div class="form-group col-md-3">
+                    <label for="bw" class="form-label">
+                      <i class="fas fa-wave-square me-1"></i>Bandwidth (BW)
+                    </label>
+                    <select class="form-control" id="bw" name="bw" style="font-size: 1rem; padding: 0.5rem;">
+                      <option value="125kHz" selected>125 kHz</option>
+                      <option value="250kHz">250 kHz</option>
+                      <option value="500kHz">500 kHz</option>
+                    </select>
+                  </div>
+                  
+                  <div class="form-group col-md-3">
+                    <label for="cr" class="form-label">
+                      <i class="fas fa-code me-1"></i>Coding Rate (CR)
+                    </label>
+                    <select class="form-control" id="cr" name="cr" style="font-size: 1rem; padding: 0.5rem;">
+                      <option value="4/5" selected>4/5</option>
+                      <option value="4/6">4/6</option>
+                      <option value="4/7">4/7</option>
+                      <option value="4/8">4/8</option>
+                    </select>
+                  </div>
+                  
+          
+                  
+                </div>
+          
+              
+
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="batiments" name="batiments" checked>
+                    <label class="form-check-label" for="batiments">
+                      <i class="fas fa-building me-1"></i>Include Buildings
+                    </label>
+                  </div>
+                  
+          
+                <!-- Manual coordinates configuration -->
+                <div class="form-check mb-3">
+                  <input class="form-check-input" type="checkbox" id="manualCoordinates" onclick="toggleConfig('Coordinates')">
+                  <label class="form-check-label" for="manualCoordinates">
+                    <i class="fas fa-map-pin me-1"></i>Manual Gateway Coordinates Configuration
+                  </label>
+                </div>
+                
+                <div class="form-group config-panel" id="Coordinates-config" style="display:none;">
+                  <label for="gatewayPositions" class="form-label">Coordinates (format: X,Y,Z;X,Y,Z...)</label>
+                  <input type="text" class="form-control" id="gatewayPositions" placeholder="Ex: 0,0,0;4000,4000,0">
+                  <small class="form-text text-muted">Separate each coordinate set with a semicolon</small>
+                </div>
+          
+                <!-- Manual spreading factors configuration -->
+                <div class="form-check mb-3">
+                  <input class="form-check-input" type="checkbox" id="manualSF" onclick="toggleConfig('sf')">
+                  <label class="form-check-label" for="manualSF">
+                    <i class="fas fa-wave-square me-1"></i>Manual Spreading Factors Configuration
+                  </label>
+                </div>
+          
+                <div class="form-group config-panel" id="sf-config" style="display:none;">
+                  <label for="sfValues" class="form-label">Spreading Factors (format: SF0,SF1,SF2...)</label>
+                  <input type="text" class="form-control" id="sfValues" placeholder="Ex: 7,8,9,10,11,12">
+                </div>
+          
+                <!-- Manual transmission powers configuration -->
+                <div class="form-check mb-3">
+                  <input class="form-check-input" type="checkbox" id="manualPT" onclick="toggleConfig('pt')">
+                  <label class="form-check-label" for="manualPT">
+                    <i class="fas fa-bolt me-1"></i>Manual Transmission Powers Configuration
+                  </label>
+                </div>
+          
+                <div class="form-group config-panel" id="pt-config" style="display:none;">
+                  <label for="ptValues" class="form-label">Powers (format: PT0,PT1,PT2...)</label>
+                  <input type="text" class="form-control" id="ptValues" placeholder="Ex: 14,12,10,8,6,4">
+                </div>
+          
+                <!-- Advanced code -->
+                <div class="form-check mb-3">
+                  <input class="form-check-input" type="checkbox" id="customFunctionsCheck" onclick="toggleCustomFunctions()">
+                  <label class="form-check-label fw-bold" for="customFunctionsCheck">
+                    <i class="fas fa-code me-1"></i>Enable Advanced Code (C++ type)
+                  </label>
+                </div>
+          
+                <div id="customFunctionsConfig" class="advanced-config">
+                  <div class="editor-header">
+                    <label for="customFunctions" class="fw-semibold mb-0 me-2">Write your code:</label>
+                    <a href="fonction-aide.html" target="_blank" title="Click to see available functions">
+                      <img src="https://cdn-icons-png.flaticon.com/512/1828/1828817.png" class="help-icon">
+                    </a>
+                  </div>
+                  <textarea id="customFunctions" placeholder="C++ Example:
+          for(int i=0; i<5; i++) {
+             
+          }
+          while(true) {
+          }" spellcheck="false"></textarea>
+                  <small class="form-text text-light mt-2">
+                    You can use loops <code>for</code>, <code>while</code>, conditions <code>if</code> etc...<br>
+                    Use <code>{}</code> for blocks and <code>;</code> to separate instructions.
+                  </small>
+                </div>
+                <!-- Terminal to display results -->
+<div class="card mt-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+            <i class="fas fa-terminal me-2"></i>Output Terminal
+        </div>
+        <button class="btn btn-sm btn-outline-secondary" onclick="clearTerminal()">
+            <i class="fas fa-trash-alt me-1"></i>Clear
+        </button>
+    </div>
+    <div class="card-body p-0">
+        <div id="terminal" class="terminal-output">
+            <div class="terminal-line">Terminal ready. Execution results will appear here.</div>
+            <!-- Results will be added here dynamically -->
+        </div>
+    </div>
+</div>
+                <div class="text-center mt-4">
+                  <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-play-circle me-2"></i>Run Simulation
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+    
+
+            <div class="card-header">
+                <i class="fas fa-chart-line me-2"></i>Simulation Summary
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <div class="bg-light p-3 rounded">
+                            <h3 class="text-primary" id="totalSent">3000</h3>
+                            <p class="mb-0">Total Packets Sent</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <div class="bg-light p-3 rounded">
+                            <h3 class="text-primary" id="totalReceived">2121</h3>
+                            <p class="mb-0">Total Packets Received</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <div class="bg-light p-3 rounded">
+                            <h3 class="text-primary" id="pdr">70.7%</h3>
+                            <p class="mb-0">Packet Delivery Ratio (PDR)</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="bg-light p-3 rounded">
+                            <h3 class="text-primary" id="confidenceInterval">65.6% – 75.8%</h3>
+                            <p class="mb-0">95% Confidence Interval</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+                <div class="card-header">
+                    <i class="fas fa-satellite-dish me-2"></i>Packets Received per Gateway
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="gatewayTable" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Gateway ID</th>
+                                    <th>Packets Received</th>
+                                    <th>95% Confidence Interval (Packets)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>GW0</td>
+                                    <td>900</td>
+                                    <td>851 – 949</td>
+                                </tr>
+                                <tr>
+                                    <td>GW1</td>
+                                    <td>750</td>
+                                    <td>704 – 796</td>
+                                </tr>
+                                <tr>
+                                    <td>GW2</td>
+                                    <td>650</td>
+                                    <td>606 – 694</td>
+                                </tr>
+                                <tr>
+                                    <td>GW3</td>
+                                    <td>500</td>
+                                    <td>460 – 540</td>
+                                </tr>
+                                <tr>
+                                    <td>GW4</td>
+                                    <td>400</td>
+                                    <td>363 – 437</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            
+
+
+                <!-- Node details -->
+                <div class="card-header">
+                    <i class="fas fa-table me-2"></i>Node Details
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="resultTable" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>X (m)</th>
+                                            <th>Y (m)</th>
+                                            <th>SF</th>
+                                            <th>Sent</th>
+                                            <th>Received</th>
+                                            <th>PDR (%)</th>
+                                            <th>ToA (ms)</th>
+                                            <th>Rate (kbps)</th>
+                                            <th>Energy (J)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>500</td>
+                                            <td>7500</td>
+                                            <td>7</td>
+                                            <td>120</td>
+                                            <td>115</td>
+                                            <td>95.8%</td>
+                                            <td>56</td>
+                                            <td>2.86</td>
+                                            <td>0.60</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>1520</td>
+                                            <td>2000</td>
+                                            <td>9</td>
+                                            <td>130</td>
+                                            <td>120</td>
+                                            <td>92.3%</td>
+                                            <td>125</td>
+                                            <td>1.28</td>
+                                            <td>1.16</td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td>2322</td>
+                                            <td>1202</td>
+                                            <td>12</td>
+                                            <td>100</td>
+                                            <td>85</td>
+                                            <td>85%</td>
+                                            <td>1450</td>
+                                            <td>0.11</td>
+                                            <td>6.20</td>
+                                        </tr>
+                                    </tbody>
+                                    
+                                <tr>
+                                    <td>4</td>
+                                    <td>300</td>
+                                    <td>180</td>
+                                    <td>10</td>
+                                    <td>150</td>
+                                    <td>120</td>
+                                    <td>80%</td>
+                                    <td>450</td>
+                                    <td>1.8</td>
+                                    <td>0.40</td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td>400</td>
+                                    <td>220</td>
+                                    <td>11</td>
+                                    <td>90</td>
+                                    <td>65</td>
+                                    <td>72.2%</td>
+                                    <td>700</td>
+                                    <td>0.98</td>
+                                    <td>0.35</td>
+                                </tr>
+                                <tr>
+                                    <td>6</td>
+                                    <td>500</td>
+                                    <td>100</td>
+                                    <td>12</td>
+                                    <td>80</td>
+                                    <td>50</td>
+                                    <td>62.5%</td>
+                                    <td>1100</td>
+                                    <td>0.59</td>
+                                    <td>0.30</td>
+                                </tr>
+                                <tr>
+                                    <td>7</td>
+                                    <td>600</td>
+                                    <td>150</td>
+                                    <td>7</td>
+                                    <td>140</td>
+                                    <td>130</td>
+                                    <td>92.9%</td>
+                                    <td>68</td>
+                                    <td>5.5</td>
+                                    <td>0.13</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+
+     
+  <!-- Quick access buttons -->
+<div class="d-flex flex-wrap gap-2 mt-3 mb-3">
+    <!-- SF Factor -->
+    <button id="btn-sf" class="btn btn-light border rounded-pill px-3 py-2 shadow-sm" onclick="changeGraph('sf', this)">
+      <i class="fas fa-wave-square me-1"></i><strong>SF Factor</strong>
+    </button>
+  
+    <!-- Node positions -->
+    <button id="btn-uniform" class="btn btn-light border rounded-pill px-3 py-2 shadow-sm" onclick="changeGraph('uniform', this)">
+      <i class="fas fa-satellite-dish me-1"></i><strong>Node Positions</strong>
+    </button>
+  
+    <!-- Packet loss -->
+    <button id="btn-color" class="btn btn-light border rounded-pill px-3 py-2 shadow-sm" onclick="changeGraph('color', this)">
+      <i class="fas fa-link-slash me-1"></i><strong>Packet Loss</strong>
+    </button>
+  
+    <!-- Rate -->
+    <button id="btn-debit" class="btn btn-light border rounded-pill px-3 py-2 shadow-sm" onclick="changeGraph('debit', this)">
+      <i class="fas fa-tachometer-alt me-1"></i><strong>Rate</strong>
+    </button>
+  
+    <!-- ToA -->
+    <button id="btn-toa" class="btn btn-light border rounded-pill px-3 py-2 shadow-sm" onclick="changeGraph('toa', this)">
+      <i class="fas fa-stopwatch me-1"></i><strong>Time on Air (ToA)</strong>
+    </button>
+  
+    <!-- Power -->
+    <button id="btn-puissance" class="btn btn-light border rounded-pill px-3 py-2 shadow-sm" onclick="changeGraph('puissance', this)">
+      <i class="fas fa-broadcast-tower me-1"></i><strong>Tx Power</strong>
+    </button>
+  </div>
+  
+  <!-- Charts -->
+  <div id="chartWithColor" class="chart-container results-section" style="display: none;">
+    <h3 class="chart-title"><i class="fas fa-link-slash me-2"></i>Packet Loss</h3>
+    <canvas id="nodeChart"></canvas>
+  </div>
+  
+  <div id="chartWithoutColor" class="chart-container results-section" style="display: none;">
+    <h3 class="chart-title"><i class="fas fa-satellite-dish me-2"></i>Node Positions</h3>
+    <canvas id="uniformNodeChart"></canvas>
+  </div>
+  
+  <div id="sfChart" class="chart-container results-section" style="display: none;">
+    <h3 class="chart-title"><i class="fas fa-wave-square me-2"></i>Distribution by SF</h3>
+    <canvas id="sfNodeChart"></canvas>
+  </div>
+  
+
+
+    <!-- Modal for 3D visualization -->
+    <div id="chartWithoutColor" class="chart-container results-section" style="display: none;">
+
+    <div class="modal fade" id="view3dModal" tabindex="-1" role="dialog" aria-labelledby="view3dModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="view3dModalLabel">
+                        <i class="fas fa-cube me-2"></i>3D Visualization of Selected Area
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-0">
+                    <div id="view3dContainer"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- JS Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <!-- Leaflet JS for map -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <!-- Leaflet Search JS -->
+    <script src="https://unpkg.com/leaflet-search@2.9.0/dist/leaflet-search.min.js"></script>
+    <!-- Three.js for 3D visualization -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- OrbitControls for Three.js -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+
+
+function updateGatewayTableWithIC(gatewayResults, nPacketsParGateway) {
+    const Z = 1.96; // for 95% CI
+
+    // Prepare data
+    const gatewaysData = gatewayResults.map((received, index) => {
+        let icText = "[0%, 0%]";
+        if (nPacketsParGateway > 0) {
+            const p = received / nPacketsParGateway;
+            const margin = Z * Math.sqrt((p * (1 - p)) / nPacketsParGateway);
+            const lower = Math.max(0, p - margin) * 100;
+            const upper = Math.min(1, p + margin) * 100;
+            icText = `[${lower.toFixed(2)}%, ${upper.toFixed(2)}%]`;
+        }
+        return {
+            id: `GW${index + 1}`,
+            totalReceived: received,
+            ic: icText
+        };
+    });
+
+    // Fill HTML table
+    const tbody = document.querySelector("#gatewayTable tbody");
+    tbody.innerHTML = "";
+    gatewaysData.forEach(gw => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${gw.id}</td>
+            <td>${gw.totalReceived}</td>
+            <td>${gw.ic}</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function updateConfidenceInterval(totalSent, totalReceived) {
+    if (totalSent === 0) {
+        document.getElementById("confidenceInterval").innerText = "[0%, 0%]";
+        return;
+    }
+
+    // Proportion
+    const p = totalReceived / totalSent;
+
+    // Z for 95%
+    const Z = 1.96;
+
+    // Confidence interval
+    const margin = Z * Math.sqrt((p * (1 - p)) / totalSent);
+
+    const lower = Math.max(0, p - margin) * 100;
+    const upper = Math.min(1, p + margin) * 100;
+
+    // HTML update
+    document.getElementById("confidenceInterval").innerText = `[${lower.toFixed(2)}%, ${upper.toFixed(2)}%]`;
+}
+const terminal = document.getElementById('terminal');
+
+// Store already displayed lines to avoid duplicates
+const displayedLines = new Set();
+
+function printToTerminal(input) {
+    if (!terminal) return;
+
+    const lines = Array.isArray(input) ? input : [input];
+
+    lines.forEach(line => {
+        let text = line;
+
+        // Check for "***"
+        const index = text.indexOf('***');
+        if (index !== -1) {
+            text = text.substring(index + 3).trim();
+        } else {
+            return; // ignore lines without ***
+        }
+
+        // Ignore empty lines or only *
+        if (!text || /^[*]+$/.test(text)) return;
+
+        // Clean start and end
+        text = text.replace(/^["\,\s]+/, '').replace(/["\]\s]+$/, '');
+
+        // Avoid duplicates
+        if (displayedLines.has(text)) return;
+        displayedLines.add(text);
+
+        // Add to terminal
+        const lineDiv = document.createElement('div');
+        lineDiv.className = 'terminal-line';
+        lineDiv.textContent = text;
+        terminal.appendChild(lineDiv);
+
+        terminal.scrollTop = terminal.scrollHeight;
+    });
+}
+
+function clearTerminal() {
+    terminal.innerHTML = '';
+}
+
+
+
+    
+        // Map initialization
+        let map, drawnCircle, drawControl, centerMarker;
+        
+        function initMap() {
+            // Initialize map centered on Paris by default
+            map = L.map('map').setView([48.8566, 2.3522], 13);
+            
+            // Add OpenStreetMap layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Add search
+            const searchControl = new L.Control.Search({
+                position: 'topleft',
+                layer: L.layerGroup(),
+                initial: false,
+                zoom: 14,
+                marker: false,
+                textPlaceholder: 'Search for a city...'
+            });
+            
+            searchControl.on('search:locationfound', function(e) {
+                if (drawnCircle) {
+                    map.removeLayer(drawnCircle);
+                }
+                if (centerMarker) {
+                    map.removeLayer(centerMarker);
+                }
+                
+                // Center map on result
+                map.setView(e.latlng, 14);
+                
+                // Create circle around found position
+                drawnCircle = L.circle(e.latlng, {
+                    color: '#3388ff',
+                    weight: 2,
+                    fillColor: '#3388ff',
+                    fillOpacity: 0.2,
+                    radius: 1000
+                }).addTo(map);
+                
+                // Update information
+                document.getElementById('radiusValue').textContent = '1000';
+                document.getElementById('radius').value = '1000';
+                document.getElementById('centerCoordinates').value = `${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`
+                // Enable 3D visualization button
+                document.getElementById('view3dBtn').disabled = false;
+            });
+            
+            map.addControl(searchControl);
+            
+            // Enable search from custom search bar
+            document.getElementById('addressSearch').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const query = this.value;
+                    if (query.length > 2) {
+                        // Use Nominatim for geocoding
+                        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data && data.length > 0) {
+                                    const result = data[0];
+                                    const latlng = L.latLng(parseFloat(result.lat), parseFloat(result.lon));
+                                    
+                                    if (drawnCircle) {
+                                        map.removeLayer(drawnCircle);
+                                    }
+                                    if (centerMarker) {
+                                        map.removeLayer(centerMarker);
+                                    }
+                                    
+                                    // Center map on result
+                                    map.setView(latlng, 14);
+                                    
+                                    // Create circle around found position
+                                    drawnCircle = L.circle(latlng, {
+                                        color: '#3388ff',
+                                        weight: 2,
+                                        fillColor: '#3388ff',
+                                        fillOpacity: 0.2,
+                                        radius: 1000
+                                    }).addTo(map);
+                                    
+                                    // Update information
+                                    document.getElementById('radiusValue').textContent = '1000';
+                                    document.getElementById('radius').value = '1000';
+                                    document.getElementById('centerCoordinates').value = `${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`;
+                                    
+                                    // Enable 3D visualization button
+                                    document.getElementById('view3dBtn').disabled = false;
+                                }
+                            });
+                    }
+                }
+            });
+            
+            // Enable circle drawing
+            document.getElementById('drawCircleBtn').addEventListener('click', function() {
+                if (drawnCircle) {
+                    map.removeLayer(drawnCircle);
+                }
+                if (centerMarker) {
+                    map.removeLayer(centerMarker);
+                }
+                
+                // Circle drawing mode
+                let circle;
+                
+                // Function to create circle
+                function createCircle(latlng, radius) {
+                    if (circle) {
+                        map.removeLayer(circle);
+                    }
+                    circle = L.circle(latlng, {
+                        color: '#3388ff',
+                        weight: 2,
+                        fillColor: '#3388ff',
+                        fillOpacity: 0.2,
+                        radius: radius
+                    }).addTo(map);
+                    
+                    // Update radius display
+                    document.getElementById('radiusValue').textContent = Math.round(radius);
+                    document.getElementById('radius').value = Math.round(radius);
+                    
+                    // Update center coordinates
+                    document.getElementById('centerCoordinates').value = `${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`;
+                    
+                    // Enable 3D visualization button
+                    document.getElementById('view3dBtn').disabled = false;
+                    
+                    return circle;
+                }
+                
+                // Event handler for map click
+                function onMapClick(e) {
+                    if (centerMarker) {
+                        map.removeLayer(centerMarker);
+                    }
+                    
+                    // Add marker at center
+                    centerMarker = L.marker(e.latlng).addTo(map)
+                        .bindPopup('Simulation Center').openPopup();
+                    
+                    // Create initial 1000m circle
+                    drawnCircle = createCircle(e.latlng, 1000);
+                    
+                    // Handler for circle movement
+                    function onMapMove(e) {
+                        if (centerMarker && drawnCircle) {
+                            const center = centerMarker.getLatLng();
+                            const radius = center.distanceTo(e.latlng);
+                            drawnCircle.setRadius(radius);
+                            document.getElementById('radiusValue').textContent = Math.round(radius);
+                            document.getElementById('radius').value = Math.round(radius);
+                        }
+                    }
+                    
+                    // Listen to mouse movements to adjust radius
+                    map.on('mousemove', onMapMove);
+                    
+                    // Stop drawing mode on second click
+                    map.once('click', function() {
+                        map.off('mousemove', onMapMove);
+                        map.off('click', onMapClick);
+                        alert('Circle defined. Click "Draw Circle" to create a new one.');
+                    });
+                }
+                
+                // Start drawing mode
+                map.once('click', onMapClick);
+                alert('Click on the map to define the circle center, then move the mouse to adjust the radius and click again to validate.');
+            });
+            
+            // Clear circle
+            document.getElementById('clearCircleBtn').addEventListener('click', function() {
+                if (drawnCircle) {
+                    map.removeLayer(drawnCircle);
+                    drawnCircle = null;
+                }
+                if (centerMarker) {
+                    map.removeLayer(centerMarker);
+                    centerMarker = null;
+                }
+                document.getElementById('radiusValue').textContent = '0';
+                document.getElementById('radius').value = '0';
+                document.getElementById('centerCoordinates').value = '0,0';
+                document.getElementById('view3dBtn').disabled = true;
+            });
+            
+            // 3D Visualization
+            document.getElementById('view3dBtn').addEventListener('click', function() {
+                if (!drawnCircle) return;
+                
+                $('#view3dModal').modal('show');
+                
+                // Initialize 3D scene after modal opening
+                setTimeout(init3DView, 100);
+            });
+        }
+        
+        // Initialize 3D view
+        function init3DView() {
+            const container = document.getElementById('view3dContainer');
+            container.innerHTML = '';
+            
+            // Get circle data
+            const center = drawnCircle.getLatLng();
+            const radius = drawnCircle.getRadius();
+            
+            // Initialize Three.js
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87CEEB); // Blue sky
+            
+            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(0, radius/500, radius/250);
+            
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            
+            // Add orbital controls
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            
+            // Add light
+            const ambientLight = new THREE.AmbientLight(0x606060);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(0, 100, 50);
+            scene.add(directionalLight);
+            
+            // Create ground
+            const groundGeometry = new THREE.CircleGeometry(radius/1000, 32);
+            const groundMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x90EE90, // Light green
+                roughness: 0.8
+            });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            scene.add(ground);
+            
+            // Add random buildings
+            const buildingCount = 30;
+            for (let i = 0; i < buildingCount; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * radius/1000 * 0.8;
+                
+                const x = Math.cos(angle) * distance;
+                const z = Math.sin(angle) * distance;
+                
+                const width = 2 + Math.random() * 4;
+                const depth = 2 + Math.random() * 4;
+                const height = 5 + Math.random() * 15;
+                
+                const buildingGeometry = new THREE.BoxGeometry(width, height, depth);
+                const buildingMaterial = new THREE.MeshStandardMaterial({ 
+                    color: Math.random() * 0x888888 + 0x777777,
+                    roughness: 0.7
+                });
+                
+                const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
+                building.position.set(x, height/2, z);
+                scene.add(building);
+            }
+            
+            // Add tower at center
+            const towerGeometry = new THREE.CylinderGeometry(1, 2, 20, 16);
+            const towerMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x8888ff,
+                roughness: 0.5,
+                metalness: 0.5
+            });
+            const tower = new THREE.Mesh(towerGeometry, towerMaterial);
+            tower.position.y = 10;
+            scene.add(tower);
+            
+            // Animation
+            function animate() {
+                requestAnimationFrame(animate);
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            
+            animate();
+            
+            // Resizing
+            window.addEventListener('resize', function() {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        }
+        
+        // Initialize map when document is loaded
+        document.addEventListener('DOMContentLoaded', initMap);
+        
+        // Rest of existing JavaScript code...
+        let chart, uniformChart, sfChart;
+        let currentGraph = 'uniform';
+       
+        function toggleConfig2(type, options = {}) {
+            const { forceCheck = null, debug = false } = options;
+            const typeUpper = type.charAt(0).toUpperCase() + type.slice(1);
+            const configDiv = document.getElementById(`${type}-config`);
+            const checkbox = document.getElementById(`manual${typeUpper}`) || 
+                           document.getElementById(`manual${type}`);
+
+            if (debug) console.log(`[Debug] toggleConfig called for ${type}`);
+
+            // Element verification
+            if (!configDiv || !checkbox) {
+                const errorMsg = `Missing elements: ${!configDiv ? `${type}-config` : ''} ${!checkbox ? `manual${typeUpper}` : ''}`.trim();
+                console.error(errorMsg);
+                return false;
+            }
+
+            // State determination
+            const isChecked = forceCheck !== null ? forceCheck : checkbox.checked;
+            
+            // Apply changes
+            configDiv.style.display = isChecked ? 'block' : 'none';
+            configDiv.classList.toggle('config-active', isChecked);
+
+            // Return applied state for chaining
+            return isChecked;
+        }
+        
+        function toggleConfig(type) {
+            try {
+                const configDiv = document.getElementById(`${type}-config`);
+                const checkbox = document.getElementById(`manual${type.toUpperCase()}`);
+                
+                if (!configDiv || !checkbox) {
+                    throw new Error(`Elements not found for ${type}`);
+                }
+                
+                configDiv.style.display = checkbox.checked ? 'block' : 'none';
+                
+                // Optional: Add class for styling
+                if (checkbox.checked) {
+                    configDiv.classList.add('config-active');
+                } else {
+                    configDiv.classList.remove('config-active');
+                }
+            } catch (error) {
+                console.error("Configuration error:", error);
+            }
+        }
+
+        document.getElementById("form").addEventListener("submit", function(event) {
+            event.preventDefault();
+ // Execute custom code if checkbox is checked
+ if (document.getElementById('customFunctionsCheck').checked) {
+            executeCustomCode();
+        }
+            const appPeriod = document.getElementById("appPeriod").value;
+            const payload = document.getElementById("payload").value;
+            const nGateways = document.getElementById("nGateways").value;
+            const nDevices = document.getElementById("nDevices").value;
+            const batiments = document.getElementById('batiments').checked ? 'true' : 'false';
+            const radius = document.getElementById('radius').value;
+            const simulationTime = document.getElementById('simulationTime').value;
+
+            
+            
+            const checkboxCoordinates = document.getElementById("manualCoordinates");
+            let gatewayPositions = "";
+            if (checkboxCoordinates.checked) {
+                gatewayPositions = document.getElementById("gatewayPositions").value;
+            }
+            
+            const checkboxSF = document.getElementById("manualSF");
+            let sftable = "";
+            if (checkboxSF.checked) {
+                sftable = document.getElementById("sftable").value;
+            }
+
+            const url = `/advanced-execute?appPeriod=${appPeriod}&payload=${payload}&nGateways=${nGateways}&nDevices=${nDevices}&Batiments=${batiments}&gatewayPositions=${encodeURIComponent(gatewayPositions)}&sftable=${encodeURIComponent(sftable)}&radius=${radius}&simulationTime=${simulationTime}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+// Direct display like console.log
+printToTerminal(JSON.stringify(data, null, 2)); // null,2 for readable indentation
+    
+
+                    const tableBody = document.querySelector('#resultTable tbody');
+                    tableBody.innerHTML = '';
+                    let totalSent = 0;
+                    let totalReceived = 0;
+
+                    const nodePositions = [];
+                    const uniformNodePositions = [];
+                    const sfPositions = [];
+
+                    // Gateway processing - CORRECTED VERSION
+                    const gatewayTableBody = document.querySelector('#gatewayTable tbody');
+                    gatewayTableBody.innerHTML = '';
+                    
+                    const nGatewaysInt = parseInt(nGateways);
+                    const gatewayResults = {};
+                    
+                    // Initialize all gateways to 0
+                    for (let i = 0; i < nGatewaysInt; i++) {
+                        gatewayResults[i] = 0;
+                    }
+                    
+                    // Fill with found data
+                    data.forEach(line => {
+                        const match = line.match(/Gateway\s+(\d+)\s*:\s*(\d+)/);
+                        if (match) {
+                            const gwId = parseInt(match[1]);
+                            const packets = parseInt(match[2]);
+                            if (gwId >= 0 && gwId < nGatewaysInt) {
+                                gatewayResults[gwId] = packets;
+                            }
+
+                            
+                        }
+                    });
+                    
+                   // Display all requested gateways
+for (let i = 0; i < nGatewaysInt; i++) {
+    const row = document.createElement('tr');
+    const idCell = document.createElement('td');
+    const receivedCell = document.createElement('td');
+
+    idCell.textContent = `Gateway ${i}`;
+    receivedCell.textContent = gatewayResults[i] || 0;
+    
+    row.appendChild(idCell);
+    row.appendChild(receivedCell);
+    gatewayTableBody.appendChild(row);
+}
+                    // Node processing
+                    data.forEach(line => {
+                        const row = document.createElement('tr');
+                        const columns = line.split('|').map(item => item.trim());
+                        
+                        if (columns[0].startsWith('Pass')) {
+                            return;
+                        }
+
+                        columns.forEach(col => {
+                            const cell = document.createElement('td');
+                            cell.textContent = col;
+                            row.appendChild(cell);
+                        });
+
+                        tableBody.appendChild(row);
+
+                        const sent = parseInt(columns[4]);
+                        const received = parseInt(columns[5]);
+
+                        totalSent += sent;
+                        totalReceived += received;
+
+                        let color = 'blue';
+                        if (received === 0) color = 'red';
+                        else if (sent === received) color = 'green';
+
+                        nodePositions.push({
+                            x: parseFloat(columns[1]),
+                            y: parseFloat(columns[2]),
+                            backgroundColor: color,
+                            label: ` ${columns[0]}`
+                        });
+
+                        uniformNodePositions.push({
+                            x: parseFloat(columns[1]),
+                            y: parseFloat(columns[2]),
+                            backgroundColor: 'gray',
+                            label: ` ${columns[0]}`
+                        });
+
+                        sfPositions.push({
+                            x: parseFloat(columns[1]),
+                            y: parseFloat(columns[2]),
+                            radius: parseInt(columns[3]),
+                            label: ` ${columns[0]}`
+                        });
+                    });
+
+                    const pdr = totalSent > 0 ? (totalReceived / totalSent * 100).toFixed(2) : 0;
+                    document.getElementById("totalSent").textContent = totalSent;
+                    document.getElementById("totalReceived").textContent = totalReceived;
+                    document.getElementById("pdr").textContent = pdr;
+
+                    updateConfidenceInterval(totalSent, totalReceived); // 1000 packets sent, 850 received
+
+                    showResultsSections();
+
+                    // Gateway positions for charts
+                    let gatewayChartPositions = [];
+                    if (nGatewaysInt == 1) {
+                        gatewayChartPositions = [
+                            { x: 0, y: 0, backgroundColor: 'black', label: 'Gateway 0' }
+                        ];
+                    } else if (nGatewaysInt == 2) {
+                        gatewayChartPositions = [
+                            { x: 0, y: 0, backgroundColor: 'black', label: 'Gateway 0' },
+                            { x: 4000, y: 4000, backgroundColor: 'black', label: 'Gateway 1' }
+                        ];
+                    } else if (nGatewaysInt == 3) {
+                        gatewayChartPositions = [
+                            { x: 0, y: 0, backgroundColor: 'black', label: 'Gateway 0' },
+                            { x: 4000, y: 4000, backgroundColor: 'black', label: 'Gateway 1' },
+                            { x: -4000, y: -4000, backgroundColor: 'black', label: 'Gateway 2' }
+                        ];
+                    } else if (nGatewaysInt == 4) {
+                        gatewayChartPositions = [
+                            { x: 0, y: 0, backgroundColor: 'black', label: 'Gateway 0' },
+                            { x: 4000, y: 4000, backgroundColor: 'black', label: 'Gateway 1' },
+                            { x: -4000, y: -4000, backgroundColor: 'black', label: 'Gateway 2' },
+                            { x: -4000, y: 4000, backgroundColor: 'black', label: 'Gateway 3' }
+                        ];
+                    } else if (nGatewaysInt == 5) {
+                        gatewayChartPositions = [
+                            { x: 0, y: 0, backgroundColor: 'black', label: 'Gateway 0' },
+                            { x: 4000, y: 4000, backgroundColor: 'black', label: 'Gateway 1' },
+                            { x: -4000, y: -4000, backgroundColor: 'black', label: 'Gateway 2' },
+                            { x: -4000, y: 4000, backgroundColor: 'black', label: 'Gateway 3' },
+                            { x: 4000, y: -4000, backgroundColor: 'black', label: 'Gateway 4' }
+                        ];
+                    }
+
+                    
+// === ➡️ ADD HERE: display positions on Leaflet map ===
+
+// Clean old markers if already displayed
+if (window.nodeLayer) { map.removeLayer(window.nodeLayer); }
+if (window.gatewayLayer) { map.removeLayer(window.gatewayLayer); }
+
+// Create groups for new markers
+window.nodeLayer = L.layerGroup().addTo(map);
+window.gatewayLayer = L.layerGroup().addTo(map);
+
+// Get center chosen by user
+const [latCenter, lngCenter] = document.getElementById('centerCoordinates').value
+    .split(',')
+    .map(v => parseFloat(v));
+
+// Unique color for nodes
+const nodeColor = '#007bff'; // bright blue
+
+// Display nodes
+nodePositions.forEach(node => {
+    const latNode = latCenter + node.y * 0.00001; 
+    const lngNode = lngCenter + node.x * 0.00001;
+
+    L.circleMarker([latNode, lngNode], {
+        radius: 6,
+        color: nodeColor,
+        fillColor: nodeColor,
+        fillOpacity: 0.9
+    }).bindPopup(node.label).addTo(window.nodeLayer);
+});
+
+// Display gateways (black square)
+gatewayChartPositions.forEach(gw => {
+    const latGw = latCenter + gw.y * 0.00001;
+    const lngGw = lngCenter + gw.x * 0.00001;
+
+    L.marker([latGw, lngGw], {
+        icon: L.divIcon({
+            className: 'custom-gateway-icon',
+            html: `<div style="width:16px;height:16px;background:black;border-radius:0;"></div>`
+        })
+    }).bindPopup(gw.label).addTo(window.gatewayLayer);
+});
+
+                    // Chart with loss coloring
+                    const ctx = document.getElementById('nodeChart').getContext('2d');
+                    if (chart) chart.destroy();
+
+                    chart = new Chart(ctx, {
+                        type: 'scatter',
+                        data: {
+                            datasets: [
+                                {
+                                    label: 'No loss',
+                                    data: nodePositions.filter(n => n.backgroundColor === 'green'),
+                                    backgroundColor: 'green',
+                                    borderColor: 'green',
+                                    pointRadius: 5
+                                },
+                                {
+                                    label: 'Partial loss',
+                                    data: nodePositions.filter(n => n.backgroundColor === 'blue'),
+                                    backgroundColor: 'blue',
+                                    borderColor: 'blue',
+                                    pointRadius: 5
+                                },
+                                {
+                                    label: 'Total loss',
+                                    data: nodePositions.filter(n => n.backgroundColor === 'red'),
+                                    backgroundColor: 'red',
+                                    borderColor: 'red',
+                                    pointRadius: 5
+                                },
+                                {
+                                    label: 'Gateway',
+                                    data: gatewayChartPositions,
+                                    backgroundColor: 'black',
+                                    borderColor: 'black',
+                                    pointStyle: 'rect',
+                                    pointRadius: 10
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top',
+                                    labels: {
+                                        boxWidth: 20,
+                                        boxHeight: 20,
+                                        font: {
+                                            size: 14
+                                        }
+                                    }
+                                },
+                                datalabels: {
+                                    align: 'top',
+                                    anchor: 'end',
+                                    color: '#000',
+                                    font: { weight: 'bold', size: 12 },
+                                    formatter: (val) => val.label
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    type: 'linear',
+                                    title: { 
+                                        display: true, 
+                                        text: 'X Position',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    }
+                                },
+                                y: {
+                                    title: { 
+                                        display: true, 
+                                        text: 'Y Position',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        plugins: [ChartDataLabels]
+                    });
+
+                    // Uniform chart
+                    const uniformCtx = document.getElementById('uniformNodeChart').getContext('2d');
+                    if (uniformChart) uniformChart.destroy();
+
+                    uniformChart = new Chart(uniformCtx, {
+                        type: 'scatter',
+                        data: {
+                            datasets: [
+                                {
+                                    label: 'Node',
+                                    data: uniformNodePositions,
+                                    backgroundColor: uniformNodePositions.map(n => n.backgroundColor),
+                                    borderColor: uniformNodePositions.map(n => n.backgroundColor),
+                                    pointRadius: 5
+                                },
+                                {
+                                    label: 'Gateway',
+                                    data: gatewayChartPositions,
+                                    backgroundColor: 'black',
+                                    borderColor: 'black',
+                                    pointStyle: 'rect',
+                                    pointRadius: 10
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top',
+                                    labels: {
+                                        boxWidth: 20,
+                                        boxHeight: 20,
+                                        font: {
+                                            size: 14
+                                        }
+                                    }
+                                },
+                                datalabels: {
+                                    align: 'top',
+                                    anchor: 'end',
+                                    color: '#000',
+                                    font: { weight: 'bold', size: 12 },
+                                    formatter: (val) => val.label
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    type: 'linear',
+                                    title: { 
+                                        display: true, 
+                                        text: 'X Position',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    }
+                                },
+                                y: {
+                                    title: { 
+                                        display: true, 
+                                        text: 'Y Position',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        plugins: [ChartDataLabels]
+                    });
+
+                    // SF Chart - CORRECTED VERSION
+                    const sfCtx = document.getElementById('sfNodeChart').getContext('2d');
+                    if (sfChart) sfChart.destroy();
+
+                    // Prepare data grouped by SF
+                    const sfGroups = {
+                        7: { color: '#AED6F1', data: [] },
+                        8: { color: '#5DADE2', data: [] },
+                        9: { color: '#A569BD', data: [] },
+                        10: { color: '#D98880', data: [] },
+                        11: { color: '#E74C3C', data: [] },
+                        12: { color: '#922B21', data: [] }
+                    };
+
+                    // Group nodes by SF
+                    sfPositions.forEach(node => {
+                        const sf = node.radius; // SF is stored in radius
+                        if (sfGroups[sf]) {
+                            sfGroups[sf].data.push({
+                                x: node.x,
+                                y: node.y,
+                                label: node.label
+                            });
+                        }
+                    });
+
+                    // Create datasets for Chart.js
+                    const sfDatasets = Object.entries(sfGroups).map(([sf, group]) => ({
+                        label: `SF${sf}`,
+                        data: group.data,
+                        backgroundColor: group.color,
+                        borderColor: group.color,
+                        pointRadius: 7,
+                        pointHoverRadius: 9
+                    }));
+
+                    // Add gateway dataset
+                    sfDatasets.push({
+                        label: 'Gateways',
+                        data: gatewayChartPositions,
+                        backgroundColor: 'black',
+                        borderColor: 'black',
+                        pointStyle: 'rect',
+                        pointRadius: 10,
+                        pointHoverRadius: 12
+                    });
+
+                    sfChart = new Chart(sfCtx, {
+                        type: 'scatter',
+                        data: {
+                            datasets: sfDatasets
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top',
+                                    labels: {
+                                        boxWidth: 20,
+                                        boxHeight: 20,
+                                        font: {
+                                            size: 14
+                                        }
+                                    }
+                                },
+                                datalabels: {
+                                    align: 'top',
+                                    anchor: 'end',
+                                    color: '#000',
+                                    font: { weight: 'bold', size: 12 },
+                                    formatter: (val) => val.label
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    type: 'linear',
+                                    title: { 
+                                        display: true, 
+                                        text: 'X Position',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    }
+                                },
+                                y: {
+                                    title: { 
+                                        display: true, 
+                                        text: 'Y Position',
+                                        font: {
+                                            weight: 'bold'
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        plugins: [ChartDataLabels]
+                    });
+
+                    // Chart display
+                    document.getElementById('chartWithColor').style.display = 'none';
+                    document.getElementById('chartWithoutColor').style.display = 'block';
+                    document.getElementById('sfChart').style.display = 'none';
+                    document.getElementById('legend').style.display = 'block';
+                    currentGraph = 'uniform';
+                });
+        });
+
+
+function changeGraph(type, btn) {
+  // Hide all charts
+  document.getElementById('chartWithColor').style.display = 'none';
+  document.getElementById('chartWithoutColor').style.display = 'none';
+  document.getElementById('sfChart').style.display = 'none';
+
+  // Reset button states
+  document.querySelectorAll('.d-flex button').forEach(b => {
+    b.classList.remove('btn-primary');
+    b.classList.add('btn-light');
+  });
+
+  // Display selected chart
+  if (type === 'uniform') {
+    document.getElementById('chartWithoutColor').style.display = 'block';
+  } else if (type === 'color') {
+    document.getElementById('chartWithColor').style.display = 'block';
+  } else if (type === 'sf') {
+    document.getElementById('sfChart').style.display = 'block';
+  }
+
+  // Highlight active button
+  btn.classList.remove('btn-light');
+  btn.classList.add('btn-primary');
+
+  currentGraph = type;
+}
+
+// Display SF by default on load
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("btn-sf").click();
+});
+
+
+
+        const links = document.querySelectorAll("nav a");
+const currentUrl = window.location.pathname;
+
+links.forEach(link => {
+  if (link.getAttribute('href') === currentUrl) {
+    link.classList.add('text-blue-600', 'font-semibold', 'border-b-2', 'border-blue-600');
+  }
+});
+const accountBtn = document.getElementById('accountBtn');
+const accountMenu = document.getElementById('accountMenu');
+
+accountBtn.addEventListener('click', (e) => {
+  e.stopPropagation(); // prevents click from propagating to `window`
+  accountMenu.classList.toggle('hidden');
+});
+
+window.addEventListener('click', (e) {
+  if (!accountMenu.classList.contains('hidden')) {
+    accountMenu.classList.add('hidden');
+  }
+});
+function showResultsSections() {
+    document.querySelectorAll('.results-section').forEach(section => {
+        section.style.display = 'block';
+    });
+}
+function fillGatewayICTableWithoutSent(gatewayResults) {
+    const Z = 1.96; // for 95% CI
+    const tbody = document.querySelector("#gatewayTable tbody");
+    tbody.innerHTML = ""; // empty table before filling
+
+    // Total of all received packets
+    const totalReceivedAll = gatewayResults.reduce((a, b) => a + b, 0);
+
+    gatewayResults.forEach((received, index) => {
+        // Proportion of packets received by this gateway
+        let icText = "[0%, 0%]";
+        if (totalReceivedAll > 0) {
+            const p = received / totalReceivedAll;
+            const margin = Z * Math.sqrt((p * (1 - p)) / totalReceivedAll);
+            const lower = Math.max(0, p - margin) * 100;
+            const upper = Math.min(1, p + margin) * 100;
+            icText = `[${lower.toFixed(2)}%, ${upper.toFixed(2)}%]`;
+        }
+
+        // Create table row
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>GW${index + 1}</td>
+            <td>${received}</td>
+            <td>${icText}</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+    </script>
+</body>
+</html>
