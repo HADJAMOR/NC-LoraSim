@@ -1,6 +1,6 @@
 # NS-LoRaSim
 
-![NS-LoRaSim](https://img.shields.io/badge/NS--LoRaSim-LoRaWAN%20Simulation%20Platform-2b9348?style=for-the-badge&logo=apachecouchdb&logoColor=white)
+![NS-LoRaSim](https://img.shields.io/badge/NS--LoRaSim-NS--3%20Based%20Simulator-333333?style=for-the-badge&logo=github&logoColor=white)
 
 ---
 
